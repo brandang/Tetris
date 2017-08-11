@@ -39,7 +39,7 @@ public class Overlay extends TextComponent{
         //Add the title.
         TextBox textBox = new TextBox(getX(),getY(),getW(),60,title);
         textBox.setTextAlignment(TEXT_ALIGN_CENTER);
-        textBox.setTopMargins(30);
+        textBox.setTopPadding(30);
         textBox.setCornerSize(20);
         textComponentManager.addComponent(textBox);
 

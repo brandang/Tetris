@@ -177,7 +177,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     	//Add the title.
         textBox1 = new TextBox(0,80, (int) size.getWidth(),150,"Tetris");
         textBox1.setTextAlignment(TextBox.TEXT_ALIGN_CENTER);
-        textBox1.setTopMargins(100);
+        textBox1.setTopPadding(100);
         Font titleFont = new Font("Arial",Font.BOLD,50);
         textBox1.setTextFont(titleFont);
         textBoxManager.addComponent(textBox1);
@@ -215,7 +215,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         //Add the text.
         textBox1 = new TextBox(50,100,(int)size.getWidth()-100,(int)size.getHeight()/2,INSTRUCTIONS_TEXT);
         textBox1.setLineSpacing(30);
-        textBox1.setTopMargins(80);
+        textBox1.setTopPadding(80);
         textBoxManager.addComponent(textBox1);
     }
     
@@ -240,7 +240,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     	//Set up text box that displays information on the controls, and add it to the text box manager.
         textBox1 = new TextBox(50,100,(int) size.getWidth()-100,(int) size.getHeight()/2, CONTROLS_TEXT);
         textBox1.setLineSpacing(30);
-        textBox1.setTopMargins(80);
+        textBox1.setTopPadding(80);
         textBoxManager.addComponent(textBox1);
     }
     
@@ -270,10 +270,10 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     	//Text descriptions and displays.
         textBox1 = new TextBox(50,100,200,100, "Next Game Piece");
         textBox1.setTextAlignment(TextBox.TEXT_ALIGN_CENTER);
-        textBox1.setTopMargins(50);
+        textBox1.setTopPadding(50);
         textBox2 = new TextBox((int)size.getWidth()-BUTTON_WIDTH, 200, BUTTON_WIDTH, 100, "Score: 0");
         textBox2.setTextAlignment(TextBox.TEXT_ALIGN_LEFT);
-        textBox2.setTopMargins(50);
+        textBox2.setTopPadding(50);
         textBoxManager.addComponent(textBox1);
         textBoxManager.addComponent(textBox2);
 
@@ -325,7 +325,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
     	//Create explanatory text box.
     	TextBox textBox = new TextBox(150,250,800,200,"Game Over! Your final score is " + score + "!");
-    	textBox.setTopMargins(30);
+    	textBox.setTopPadding(30);
     	textBox.setTextAlignment(TextComponent.TEXT_ALIGN_CENTER);
     	menuOverlay.addTextBox(textBox);
     }
@@ -376,7 +376,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
         //Textbox.
         TextBox textBox = new TextBox(150,250,800,200,"The game is paused. Resume the game, or restart it.");
-        textBox.setTopMargins(30);
+        textBox.setTopPadding(30);
         textBox.setTextAlignment(TextComponent.TEXT_ALIGN_CENTER);
         menuOverlay.addTextBox(textBox);
     }

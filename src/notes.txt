@@ -1,0 +1,69 @@
+1	2	3	
+4	5	6	
+7	8	9	
+
+3	6	9	
+2	5	8	
+1	4	7
+
+2,0
+0,0
+
+0,1
+1,2
+
+1,0
+0,1
+
+
+Switch set new x = old y
+set new y = size - 1 - old x
+
+
+
+/*
+        There are 7 types of blocks that can be generated, shown below. Let 0 represent empty space and 1
+        represent a block.
+
+        I Piece
+        0100
+        0100
+        0100
+        0100
+
+        J Piece
+        0010
+        0010
+        0110
+        0000
+
+        L Piece
+        0100
+        0100
+        0110
+        0000
+
+        O Piece
+        0000
+        0110
+        0110
+        0000
+
+        S piece
+        0000
+        0011
+        0110
+        0000
+
+        Z piece
+        0000
+        0110
+        0011
+        0000
+
+        T piece
+        0000
+        0111
+        0010
+        0000
+         */

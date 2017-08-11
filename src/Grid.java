@@ -9,8 +9,8 @@ import javax.swing.text.html.HTMLDocument.Iterator;
  */
 public class Grid {
 
-    //The positions and and dimensions of the grid.
-    private int x, y, w, h;
+    //The positions of the grid.
+    private int x, y;
 
     //All of the blocks in this grid.
     private ArrayList<Block> blocks = new ArrayList<>(0);
@@ -33,20 +33,14 @@ public class Grid {
      * Constructor. Takes in positions and dimensions as parameters.
      * @param x The left coordinate of the grid.
      * @param y The top coordinate of the grid.
-     * @param w The width of the grid.
-     * @param h The height of the grid.
+     * @param columns The number of columns on the grid.
+     * @param rows The number of rows on the grid.
      */
-    public Grid(int x, int y, int w, int h) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-
-        //Calculate the number of rows and columns.
-        int blockWidth = Block.getBlockWidth();
-        int blockHeight = Block.getBlockHeight();
-        columns = w/blockWidth;
-        rows = h/blockHeight;
+    public Grid(int x, int y, int columns, int rows) {
+        setX(x);
+        setY(y);
+        setColumns(columns);
+        setRows(rows);
 
         //Defaults.
         setDrawTerminalLine(false);
@@ -68,16 +62,20 @@ public class Grid {
         int blockWidth = Block.getBlockWidth();
         int blockHeight = Block.getBlockHeight();
 
+        //Calculate dimensions of the grid.
+        Dimension size = new Dimension(blockWidth * columns, blockHeight * rows);
+
+        //Draw the background.
     	g.setColor(GRID_BACKGROUND_COLOUR);
-    	g.fillRect(x, y, w, h);
+    	g.fillRect(x, y, size.width, size.height);
 
     	//Draw the terminal line.
         if (drawTerminalLine == true) {
             g.setColor(TERMINAL_LINE_COLOUR);
-            g.fillRect(x, y, w, blockHeight);
+            g.fillRect(x, y, size.width, blockHeight);
         }
 
-        //Offset is basically the position of this grid within the window.
+        //Offset is basically the top left position of this grid within the window.
     	int offsetX = this.x;
     	int offsetY = this.y;
     	
@@ -223,11 +221,35 @@ public class Grid {
         this.drawTerminalLine = drawTerminalLine;
     }
 
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public void setRows(int rows) {
+        this.rows = rows;
+    }
+
+    public void setColumns(int columns) {
+        this.columns = columns;
+    }
+
     public int getRows() {
         return rows;
     }
 
     public int getColumns() {
         return columns;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
     }
 }

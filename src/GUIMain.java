@@ -32,6 +32,9 @@ public class GUIMain implements Runnable{
 	if all of them fails, then there is no way to rotate it
 
 	fix glitch where block has 'landed' when in reality it has just hit the side of another block
+	fix glitch when gameover and the menu button dissapears
+
+	Fix Grid dimensions in grid class and Gamepanel
 
 	 */
 	public static void main(String[] args) {

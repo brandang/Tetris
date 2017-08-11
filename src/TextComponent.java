@@ -2,7 +2,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 
 /**
- * A text area component. It is basically a box with text in it.
+ * A text area component. It is a box with text in it. It contains methods for drawing itself on the screen.
  */
 public abstract class TextComponent {
 

@@ -102,7 +102,7 @@ public abstract class TextComponent {
         int textWidth = fontMetrics.stringWidth(text);
 
         //Amount of space that needs to be added to center the text.
-        int adjustment = (getW()-(getSidePadding()*2)-textWidth)/2;
+        int adjustment = (getW() - (getSidePadding() * 2) - textWidth) / 2;
         int drawX = getX() + getSidePadding() + adjustment;
 
 //        int centerX = getX() + (getW()/2);

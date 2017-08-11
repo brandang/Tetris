@@ -9,23 +9,23 @@ import javax.swing.text.html.HTMLDocument.Iterator;
  */
 public class Grid {
 
-    //The position and and dimensions of the grid.
+    //The positions and and dimensions of the grid.
     private int x, y, w, h;
 
     //All of the blocks in this grid.
     private ArrayList<Block> blocks = new ArrayList<>(0);
     
-    //The colours to draw.
+    //The colours to use in drawing.
     final static private Color GRID_BACKGROUND_COLOUR = new Color(0, 70, 100);
     final static private Color GRID_LINES_COLOUR = new Color(0, 170, 227);
     final static private Color COLOUR_BLACK = Color.BLACK;
     final static private Color TERMINAL_LINE_COLOUR = new Color(161, 0, 4);
 
     //The number of rows and columns.
-    private int rows,columns;
+    private int rows, columns;
 
     //Whether or not to draw the red terminal line at the top.
-    private boolean drawTerminalLine = false;
+    private boolean drawTerminalLine;
     //Where the terminal line is.
     final private static int TERMINAL_LINE_ROW = 0;
 
@@ -49,7 +49,7 @@ public class Grid {
         rows = h/blockHeight;
 
         //Defaults.
-        drawTerminalLine = false;
+        setDrawTerminalLine(false);
     }
 
     /**

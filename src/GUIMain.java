@@ -2,6 +2,7 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 /*
+Testing 1 2 3
 NOTES:
 I originally intended to add a few more features to this program. However, I am unable to, due to time constraints.
 I have fixed all of the bugs that I have found, but due to the size and complexity of this program (WHY DID I

@@ -262,10 +262,10 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         buttonManager.prepareButtons(previousMouseEvent);
     	
     	//Create a game grid.
-    	gameGrid = new Grid(BUTTON_WIDTH,0,(size.width-(BUTTON_WIDTH*2)),size.height);
+    	gameGrid = new Grid(BUTTON_WIDTH,0, 10,16);
     	gameGrid.setDrawTerminalLine(true);
     	//Grid to display panel.
-    	sideGrid = new Grid(50,200,200,200);
+    	sideGrid = new Grid(50,200,4,4);
 
     	//Text descriptions and displays.
         textBox1 = new TextBox(50,100,200,100, "Next Game Piece");

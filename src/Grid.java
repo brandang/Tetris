@@ -1,8 +1,6 @@
 import java.awt.*;
 import java.util.ArrayList;
 
-import javax.swing.text.html.HTMLDocument.Iterator;
-
 /**
  * This class represents a grid in the game window. It is responsible for drawing and keeping track of all
  * the blocks on the grid.
@@ -12,17 +10,20 @@ public class Grid {
     //The positions of the grid.
     private int x, y;
 
+    //The number of rows and columns.
+    private int rows, columns;
+
     //All of the blocks in this grid.
     private ArrayList<Block> blocks = new ArrayList<>(0);
     
     //The colours to use in drawing.
     final static private Color GRID_BACKGROUND_COLOUR = new Color(0, 70, 100);
     final static private Color GRID_LINES_COLOUR = new Color(0, 170, 227);
-    final static private Color COLOUR_BLACK = Color.BLACK;
+    final static private Color OUTLINE_COLOUR = Color.BLACK;
     final static private Color TERMINAL_LINE_COLOUR = new Color(161, 0, 4);
 
-    //The number of rows and columns.
-    private int rows, columns;
+    //The grid`s outline`s stroke width.
+    final static private int OUTLINE_WIDTH = 5;
 
     //Whether or not to draw the red terminal line at the top.
     private boolean drawTerminalLine;
@@ -81,26 +82,28 @@ public class Grid {
     	
     	g.setColor(GRID_LINES_COLOUR);
     	
+    	//Calculate the width and height of the grid in pixels.
+        int gridHeight = (blockHeight * rows);
+        int gridWidth = (blockWidth * columns);
+
     	//Vertical lines.
-    	int x = blockWidth;
-    	while (x < w) {
-    		g.drawLine(x+offsetX, offsetY+0, x+offsetX, offsetY+h);
-    		x += blockWidth;
-    	}
+    	for (int x = 0; x < columns; x ++) {
+    	    int drawX = (x * blockWidth) + blockWidth;
+    	    g.drawLine(drawX + offsetX, offsetY, drawX + offsetX, gridHeight + offsetY);
+        }
 
     	//Horizontal lines.
-    	int y = blockHeight;
-    	while (y < h) {
-    		g.drawLine(offsetX+0, offsetY+y, offsetX+w, offsetY+y);
-    		y += blockHeight;
-    	}
-    	
+        for (int y = 0; y < rows; y ++) {
+    	    int drawY = (y * blockHeight) + blockHeight;
+    	    g.drawLine(offsetX, drawY + offsetY, offsetX + gridWidth, drawY + offsetY);
+        }
+
     	//Grid outline.
-    	g.setColor(COLOUR_BLACK);
-    	g.fillRect(offsetX, offsetY, 5, h);
-    	g.fillRect(offsetX+w-5, offsetY, 5, h);
-    	g.fillRect(offsetX, offsetY, w, 5);
-    	g.fillRect(offsetX, offsetY+h-5, w, 5);
+    	g.setColor(OUTLINE_COLOUR);
+    	g.fillRect(offsetX, offsetY, OUTLINE_WIDTH, gridHeight);
+    	g.fillRect(offsetX + gridWidth - OUTLINE_WIDTH, offsetY, OUTLINE_WIDTH, gridHeight);
+    	g.fillRect(offsetX, offsetY, gridWidth, OUTLINE_WIDTH);
+    	g.fillRect(offsetX, offsetY + gridHeight - OUTLINE_WIDTH, gridWidth, OUTLINE_WIDTH);
     }
 
     /**
@@ -122,26 +125,25 @@ public class Grid {
 
     /**
      * Checks to see if there is a full horizontal line made up of blocks
-     * int he specified row.
+     * in the specified row. Does not count blocks that are considered to be part of a game piece.
      * @param row The row in which to check.
      * @return True for yes, false for no.
      */
     public boolean horizontalLineFormed(int row) {
+
         int blockNum = 0;
         for (Block block : blocks) {
         	if (block.isPartOfGamePiece() == false) {
-        	    //Block is in this row.
+                //Block is in this row.
 	            if (block.getY() == row) {
 	                blockNum ++;
 	            }
         	}
 //            System.out.println(block.getY());
-
         }
-        
 //        System.out.println(blockNum);
 
-        //The roll is full.
+        //The row is full.
         if (blockNum >= columns) {
             return true;
         }
@@ -173,11 +175,13 @@ public class Grid {
     }
     
     /**
-     * Checks to see if any block is on the terminal line.
+     * Checks to see if any block is on the terminal line. Does not count blocks that are considered to be a part of
+     * a game piece.
      * @return True if yes, false for no.
      */
     public boolean blockOnTerminalLine() {
-    	for (Block block : blocks) {
+
+        for (Block block : blocks) {
     		if (block.isPartOfGamePiece() == false) {
     			if (block.getY() == TERMINAL_LINE_ROW) {
     				return true;
@@ -193,6 +197,7 @@ public class Grid {
      * @param row The row that was just deleted.
      */
     public void dropBlocks(int row) {
+
         for (Block block : blocks) {
             //Make sure its not a part of a game piece.
             if (block.isPartOfGamePiece() == false) {
@@ -217,38 +222,74 @@ public class Grid {
 
     /*  Getters and Setters */
 
+    /**
+     * Set whether or not to draw the terminal line.
+     * @param drawTerminalLine True for yes, false for no.
+     */
     public void setDrawTerminalLine(boolean drawTerminalLine) {
         this.drawTerminalLine = drawTerminalLine;
     }
 
+    /**
+     * Set the x coordinate of the grid.
+     * @param x The new x coordinate.
+     */
     public void setX(int x) {
         this.x = x;
     }
 
+    /**
+     * Set the y coordinate of the grid.
+     * @param y The new y coordinate.
+     */
     public void setY(int y) {
         this.y = y;
     }
 
+    /**
+     * Set the number of rows in the grid.
+     * @param rows The new number of rows.
+     */
     public void setRows(int rows) {
         this.rows = rows;
     }
 
+    /**
+     * Set the number of columns in the grid.
+     * @param columns The new number of columns.
+     */
     public void setColumns(int columns) {
         this.columns = columns;
     }
 
+    /**
+     * Get the number of rows in the grid.
+     * @return The number of rows.
+     */
     public int getRows() {
         return rows;
     }
 
+    /**
+     * Get the number of columns in the grid.
+     * @return The number of colunms.
+     */
     public int getColumns() {
         return columns;
     }
 
+    /**
+     * Get the x coordinate of the grid in relation to the window.
+     * @return The x position, in pixels.
+     */
     public int getX() {
         return x;
     }
 
+    /**
+     * Get the y coordinate of the grid in relation to the window.
+     * @return The y position, in pixels.
+     */
     public int getY() {
         return y;
     }

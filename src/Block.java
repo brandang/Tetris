@@ -4,7 +4,7 @@ import java.awt.*;
  */
 public class Block {
 
-    //True if it is currently a part of a GamePiece, false if it is not.
+    //True if it is currently a part of a Tetrimino, false if it is not.
     private boolean partOfGamePiece;
 
     //The 'position' of the block on the game grid. The 'position' can be thought of as

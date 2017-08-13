@@ -3,51 +3,46 @@ import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * This class represents a game piece. A game piece is an object that the user can control.
- * It is made up of many blocks. Once the game piece has 'landed', however, the blocks are
- * declared to be no longer a part of the game piece, and the game piece is destroyed as an entity
+ * This class represents a Tetrimino. A Tetrimino is a game piece that the user can control.
+ * It is made up of many blocks, which form shapes. Once the Tetrimino has 'landed', however, the blocks are
+ * declared to be no longer a part of the Tetrimino, and the Tetrimino is destroyed as an entity
  * (although its blocks will remain).
  *
- * Each game piece will be contained within a 4 by 4 grid.
+ * Each Tetrimino will be contained within a 4 by 4 grid.
  * The pivot around which the game piece rotates is the center of the 4 by 4 grid.
  *
- * OMG, there were so many bugs that I had to kill for this class!
  */
-public class GamePiece {
+public class Tetrimino {
 
-    //The colour of the game piece. All of the blocks in the game piece will inherit this.
+    //The colour of the Tetrimino. All of the blocks in the Tetrimino will inherit this.
     private Color colour;
 
+    //The Grid object that the Tetrimino is on.
     private Grid grid;
 
     //Reference to all of the blocks on the grid, obtained from Grid object.
-    //This allows us to modify the arrayList from the grid instance.
+    //This allows this Tetrimino to modify the blocks in the Grid.
     private ArrayList<Block> gridBlocks = new ArrayList<>(0);
 
-    //All of the blocks that are a part of the game piece. Will contain some of the blocks in 'gridBlocks'.
+    //All of the blocks that are a part of the Tetrimino. Will include some of the blocks found in 'gridBlocks'.
     private ArrayList<Block> gamePieceBlocks = new ArrayList<>(0);
 
     //The maximum number of blocks that can be placed end to end horizontally or vertically.
     final private static int SIZE = 4;
 
     /**
-     * Constructor. Creates a new game piece.
-     * @param grid All of the blocks from the grid.
+     * Constructor. Creates a new Tetrimino.
+     * @param grid The Grid that will hold this Tetrimino.
      */
-    public GamePiece(Grid grid) {
-        /*
-        Reference to the arrayList in a Grid instance. This works because Java is pass by reference (technically,
-        it`s more complicated than that, but...)
-        This means that every change to the arrayList here will change the same object in the Grid class.
-        They are the same objects.
-        */
+    public Tetrimino(Grid grid) {
+
         this.grid = grid;
+        //Get the arrayList of Blocks from the Grid object. This allows us to modify the blocks in the Grid from here.
         this.gridBlocks = grid.getBlocks();
     }
 
     /**
-     * Creates a random new game piece with a random shape, a random colour, a random orientation...
-     * So basically, a lot of randoms :)
+     * Creates a random new game piece with a random shape, a random colour, and a random orientation.
      */
     public void generateNewPiece() {
 
@@ -105,6 +100,8 @@ public class GamePiece {
         0010
         0000
          */
+
+        //Create shapes based on the generated number.
 
         //I Piece.
         if (gen == 0) {
@@ -184,9 +181,7 @@ public class GamePiece {
             gamePieceBlocks.add(block);
         }
 
-        /*
-        Rotate randomly.
-         */
+        //Rotate randomly.
         gen = random.nextInt(4);
         for (int i = 0; i < gen; i ++) {
             rotate();
@@ -223,11 +218,9 @@ public class GamePiece {
         else if (gen == 5) {
             return Color.ORANGE;
         }
-        //I like this colour.
         else if (gen == 6) {
             return Color.GRAY;
         }
-        //I don`t like this colour.
         else {
             return Color.PINK;
         }
@@ -235,7 +228,6 @@ public class GamePiece {
 
     /**
      * Rotates the game piece 90 degrees clockwise.
-     *
      */
     public void rotate() {
 
@@ -243,7 +235,7 @@ public class GamePiece {
         This method is very complex and difficult!
         There are soooo many potential problems.
         Firstly, when rotated, the game piece may collide with other blocks. We need to prevent rotation if it
-        is not possible. Therefore, create a copy of all of the blocks in the piece, and apply the rotation to them.
+        is not possible to do so. Therefore, create a copy of all of the blocks in the piece, and apply the rotation to them.
         Check to see if the rotation results in any overlaps/collisions with other blocks. If no, it is safe
         to rotate.
         */
@@ -280,7 +272,7 @@ public class GamePiece {
          */
         //Get left most and top most position.
         for (Block block : blocks) {
-            if (block.getX()<offsetX) {
+            if (block.getX() < offsetX) {
                 offsetX = block.getX();
             }
             if (block.getY() < offsetY) {

@@ -52,7 +52,7 @@ public class Overlay extends TextComponent{
 
     /**
      * Add button.
-     * @param button
+     * @param button The button to add.
      */
     public void addButton(Button button) {
         buttonManager.addComponent(button);
@@ -60,7 +60,7 @@ public class Overlay extends TextComponent{
 
     /**
      * Add text box.
-     * @param textBox
+     * @param textBox The text box to add.
      */
     public void addTextBox(TextBox textBox) {
         textComponentManager.addComponent(textBox);
@@ -68,7 +68,7 @@ public class Overlay extends TextComponent{
 
     /**
      * Updates the buttons to their states.
-     * @param e
+     * @param e The mouse event.
      */
     public void updateButtonStates(MouseEvent e) {
         buttonManager.updateButtonStates(e);
@@ -79,18 +79,18 @@ public class Overlay extends TextComponent{
      * @param g The graphics object.
      */
     public void draw(Graphics g) {
-        drawBackground(g, windowSize);
+        drawBackground(g, getWindowSize());
         drawTextComponents(g);
     }
 
     /**
      * Draw the background of the overlay.
-     * @param g
-     * @param screenSize
+     * @param g The graphics object.
+     * @param windowSize The size of the window.
      */
-    private void drawBackground(Graphics g, Dimension screenSize) {
+    private void drawBackground(Graphics g, Dimension windowSize) {
         g.setColor(OVERLAY_TRANSPARENT_COLOUR);
-        g.fillRect(0,0, getWindowSize().width, getWindowSize().height);
+        g.fillRect(0,0, windowSize.width, windowSize.height);
         g.setColor(OUTLINE_COLOUR);
         g.fillRoundRect(getX(), getY(), getW(),getH(), getCornerSize(), getCornerSize());
         g.setColor(BACKGROUND_COLOUR);
@@ -100,7 +100,7 @@ public class Overlay extends TextComponent{
 
     /**
      * Draw the buttons and text boxes of the overlay.
-     * @param g
+     * @param g The graphics object.
      */
     private void drawTextComponents(Graphics g) {
         buttonManager.drawComponents(g);
@@ -109,8 +109,8 @@ public class Overlay extends TextComponent{
 
     /**
      * Checks to see which button, if any, was clicked.
-     * @param e
-     * @return
+     * @param e The mouse event.
+     * @return The button that was clicked.
      */
     public Button getClickedButton(MouseEvent e) {
         return (Button) buttonManager.getClickedButton(e);

@@ -36,10 +36,10 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     //Link to webpage that describes the game.
     final private static String TETRIS_INFO_URL = "https://en.wikipedia.org/wiki/Tetris#Gameplay";
 
-    //The dropTimer for drawing.
+    //The timer for drawing.
     private Timer animationTimer;
 
-    //Target is a good 60 FPS, 4K resolution :)
+    //Target FPS.
     final static private double TARGET_FPS = 60;
     //Amount of time, in millis, to delay to get target FPS
     private double delayTime;
@@ -57,15 +57,12 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     //The last mouseEvent that was received.
     private MouseEvent previousMouseEvent = null;
 
-    //Size of the screen.
+    //Size of the window.
     private Dimension size;
     
     //The game state.
     private enum State {MAIN_MENU,HOW_TO_PLAY,CONTROLS,GAME_ON,GAME_OVER};
     private State state = State.MAIN_MENU;
-    
-    //The text font.
-    final static private Font TEXT_FONT = new Font("Arial",Font.PLAIN,20);
     
     //The button colours.
     final static private Color PRIMARY_BUTTON_COLOUR = new Color(120, 120, 120);
@@ -79,9 +76,6 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 	final static private int BUTTON_WIDTH = 300;
 	final static private int BUTTON_HEIGHT = 100;
 
-    //Stores whether or not user is currently holding down the mouse.
-    private boolean mouseDown = false;
-    
     //The main game grid.
     private Grid gameGrid;
     //The side grid to display the next game piece.
@@ -94,32 +88,30 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     private Button but1,but2,but3;
 
     //The textboxes.
-    private TextBox textBox1, textBox2, textBox3;
+    private TextBox textBox1, textBox2;
 
     //Manager for the textboxes.
     private TextComponentManager textBoxManager;
 
-    //The game pieces.
-    private GamePiece currentGamePiece;
-    private GamePiece nextGamePiece;
+    //The Tetriminos.
+    private Tetrimino currentTetrimino;
+    private Tetrimino nextTetrimino;
 
     //The menu overlays for game over and pauseGame screens.
     private Overlay menuOverlay = null;
 
-    //Timer. Used to drop the game block by one cell after a set amount of time.
+    //Timer. Used to drop the Tetrimino by one cell after a set amount of time.
     private Timer dropTimer;
-    //How long to wait before dropping game piece again by one cell.
+    //How long to wait before dropping Tetrimino again by one cell.
     private int dropTime;
     final private static int INITIAL_DROP_TIME = 500;
 
-    //Whether or not to pauseGame the game.
+    //Whether or not to pause the game.
     private boolean pauseGame = false;
 
     //The score.
     private int score = 0;
 
-    int hell = 1 + 2;
-    
     /**
      * Constructor.
      */
@@ -142,7 +134,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         this.setFocusable(true);
         this.requestFocus();
         
-        //Set up the game.
+        //Set up the TextComponent managers.
         buttonManager = new ButtonManager();
         textBoxManager = new TextComponentManager();
 
@@ -154,11 +146,12 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
      * Method that must be called whenever we are going to the main menu.
      */
     public void goToMainMenu() {
+
     	//Set the state.
         updateState(State.MAIN_MENU);
 
     	//Get the center of the screen.
-    	int centerX = (int) (size.getWidth()/2);
+    	int centerX = (int) (size.getWidth() / 2);
     	
     	//Set up the buttons. They will be drawn horizontally center to the screen.
     	but1 = new Button(centerX-(BUTTON_WIDTH/2), 300, BUTTON_WIDTH, BUTTON_HEIGHT, "Play",
@@ -168,7 +161,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     	but3 = new Button(centerX-(BUTTON_WIDTH/2), 600, BUTTON_WIDTH, BUTTON_HEIGHT, "Controls",
                 PRIMARY_BUTTON_COLOUR, SECONDARY_BUTTON_COLOUR);
     	
-    	//Add these buttons.
+    	//Add those buttons.
     	buttonManager.addComponent(but1);
     	buttonManager.addComponent(but2);
     	buttonManager.addComponent(but3);
@@ -187,23 +180,19 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
      * Method that must be called when we are going to the 'How to Play' screen.
      */
     public void goToInstructions() {
+
     	//Set the state.
     	updateState(State.HOW_TO_PLAY);
     	
     	//Get the center of the screen.
     	int centerX = (int) (size.getWidth()/2);
-    	
-    	/*
-    	Set up the buttons. Sorry for the messy parameters, theres a ton of calculations to get the position.
 
-        centerX-(BUTTON_WIDTH/2) for the x parameter basically centers the button in the middle of the screen
-        horizontally.
-        */
-    	but1 = new Button(centerX-(BUTTON_WIDTH/2)-((int)(BUTTON_WIDTH*1.1)), 600, BUTTON_WIDTH, BUTTON_HEIGHT,
+    	//Set up the buttons. They will be positioned near the bottom of the window.
+    	but1 = new Button(centerX - (BUTTON_WIDTH / 2) - ((int) (BUTTON_WIDTH * 1.1)), 600, BUTTON_WIDTH, BUTTON_HEIGHT,
                 "More on Tetris (Open Webpage)", PRIMARY_BUTTON_COLOUR, SECONDARY_BUTTON_COLOUR);
-    	but2 = new Button(centerX-(BUTTON_WIDTH/2), 600, BUTTON_WIDTH, BUTTON_HEIGHT, "Continue to Controls",
+    	but2 = new Button(centerX - (BUTTON_WIDTH / 2), 600, BUTTON_WIDTH, BUTTON_HEIGHT, "Continue to Controls",
                 PRIMARY_BUTTON_COLOUR, SECONDARY_BUTTON_COLOUR);
-    	but3 = new Button(centerX-(BUTTON_WIDTH/2)+((int)(BUTTON_WIDTH*1.1)), 600, BUTTON_WIDTH, BUTTON_HEIGHT,
+    	but3 = new Button(centerX - (BUTTON_WIDTH / 2) + ((int) (BUTTON_WIDTH * 1.1)), 600, BUTTON_WIDTH, BUTTON_HEIGHT,
                 "Return to Main Menu", PRIMARY_BUTTON_COLOUR, SECONDARY_BUTTON_COLOUR);
 
         //Add these buttons.
@@ -223,6 +212,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
      * Method that must be called when we are going to the 'Controls' screen.
      */
     public void goToControls() {
+
     	//Update game state.
         updateState(State.CONTROLS);
     	
@@ -264,26 +254,26 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     	//Create a game grid.
     	gameGrid = new Grid(BUTTON_WIDTH,0, 10,16);
     	gameGrid.setDrawTerminalLine(true);
-    	//Grid to display panel.
+    	//Grid to display upcoming Tetrimino.
     	sideGrid = new Grid(50,200,4,4);
 
     	//Text descriptions and displays.
-        textBox1 = new TextBox(50,100,200,100, "Next Game Piece");
+        textBox1 = new TextBox(50,100,200,100, "Next Tetrimino");
         textBox1.setTextAlignment(TextBox.TEXT_ALIGN_CENTER);
         textBox1.setTopPadding(50);
-        textBox2 = new TextBox((int)size.getWidth()-BUTTON_WIDTH, 200, BUTTON_WIDTH, 100, "Score: 0");
+        textBox2 = new TextBox((int) size.getWidth() - BUTTON_WIDTH, 200, BUTTON_WIDTH, 100, "Score: 0");
         textBox2.setTextAlignment(TextBox.TEXT_ALIGN_LEFT);
         textBox2.setTopPadding(50);
         textBoxManager.addComponent(textBox1);
         textBoxManager.addComponent(textBox2);
 
-        //Create the game piece that is next in line.
-        nextGamePiece = new GamePiece(sideGrid);
-        nextGamePiece.generateNewPiece();
+        //Create the Tetrimino that is next in line.
+        nextTetrimino = new Tetrimino(sideGrid);
+        nextTetrimino.generateNewPiece();
 
-        //Create the first game piece.
-        currentGamePiece = new GamePiece(gameGrid);
-        currentGamePiece.generateNewPiece();
+        //Create the first Tetrimino.
+        currentTetrimino = new Tetrimino(gameGrid);
+        currentTetrimino.generateNewPiece();
 
         //Set initial variables.
         dropTime = INITIAL_DROP_TIME;
@@ -293,7 +283,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
     /**
      * Method that needs to be called whenever the game screen/state changes; for example, it must be called when the
-     * program goes to the main menu. This method deletes all textboxes and buttons used in the previous screen.
+     * program goes to the main menu. This method deletes all text boxes and buttons used in the previous screen/state.
      * @param newState The new state in which to change into.
      */
     private void updateState(State newState) {
@@ -304,9 +294,10 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
 
     /**
-     * End the game. Ask user whether to play again or return to menu.
+     * End the game. Ask user whether to play again or return to main menu.
      */
     private void gameOver() {
+
         //Update the state.
         updateState(State.GAME_OVER);
     	//Pause the game.
@@ -315,12 +306,15 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         dropTimer.stop();
         dropTimer = null;
         //Set up menu overlay.
-    	menuOverlay = new Overlay(100,100,(int)size.getWidth()-200,(int)size.getHeight()-200,"Game Over!",size);
+    	menuOverlay = new Overlay(100,100,(int) size.getWidth() - 200,(int) size.getHeight() - 200,
+                "Game Over!", size);
 
-    	//Create buttons.
-        but2 = new Button(150,500,BUTTON_WIDTH,BUTTON_HEIGHT,"Play Again",PRIMARY_BUTTON_COLOUR,SECONDARY_BUTTON_COLOUR);
+    	//Create buttons for the menu overlay.
+        but2 = new Button(150,500, BUTTON_WIDTH, BUTTON_HEIGHT,"Play Again", PRIMARY_BUTTON_COLOUR,
+                SECONDARY_BUTTON_COLOUR);
         menuOverlay.addButton(but2);
-        but3 = new Button(650,500,BUTTON_WIDTH,BUTTON_HEIGHT,"Return to Main Menu",PRIMARY_BUTTON_COLOUR,SECONDARY_BUTTON_COLOUR);
+        but3 = new Button(650,500, BUTTON_WIDTH, BUTTON_HEIGHT,"Return to Main Menu", PRIMARY_BUTTON_COLOUR,
+                SECONDARY_BUTTON_COLOUR);
     	menuOverlay.addButton(but3);
 
     	//Create explanatory text box.
@@ -365,16 +359,17 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
      * Create the pause menu. It has the option to resume or restart the game.
      */
     private void createPauseMenu() {
+
         //Set up menu overlay.
         menuOverlay = new Overlay(100,100,(int)size.getWidth()-200,(int)size.getHeight()-200,"Game Paused",size);
 
-        //Buttons.
+        //Set up buttons for the pause menu.
         but2 = new Button(150,500,BUTTON_WIDTH,BUTTON_HEIGHT,"Resume",PRIMARY_BUTTON_COLOUR,SECONDARY_BUTTON_COLOUR);
         menuOverlay.addButton(but2);
         but3 = new Button(650,500,BUTTON_WIDTH,BUTTON_HEIGHT,"Restart",PRIMARY_BUTTON_COLOUR,SECONDARY_BUTTON_COLOUR);
         menuOverlay.addButton(but3);
 
-        //Textbox.
+        //Explanatory text box.
         TextBox textBox = new TextBox(150,250,800,200,"The game is paused. Resume the game, or restart it.");
         textBox.setTopPadding(30);
         textBox.setTextAlignment(TextComponent.TEXT_ALIGN_CENTER);
@@ -382,18 +377,18 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     }
 
     /**
-     * Overridden paint method.
+     * Overridden paint method. Draws on the window.
      */
     @Override
     public void paint(Graphics g) {
 
-        //Check if the dropTimer has been started.
+        //Check if the draw/animation has been started. This is the timer that counts when to redraw frames.
         if (animationTimer == null) {
             //If not, set it up and start it.
             setupAnimationTimer();
         }
 
-        //Clear the panel.
+        //Clear the window.
         size = getSize();
         g.setColor(Color.white);
         g.fillRect(0, 0, size.width, size.height);
@@ -422,23 +417,24 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         }
         //The game is over.
         else if (state == State.GAME_OVER) {
-            //Continue drawing the game, its in the background.
+            //Continue drawing the game, it's in the background.
             drawGame(g);
         }
         
         //Draw the text boxes on top.
         textBoxManager.drawComponents(g);
 
-        //Draw all appropriate buttons on top of everything else.
+        //Draw all appropriate buttons on top.
         buttonManager.drawComponents(g);
 
-        //Draw the overlay, if it exists.
+        //Draw the overlay on top of everything else, if it exists.
         if (menuOverlay != null) {
             menuOverlay.draw(g);
         }
 
         //Display debug information.
         if (debug == true) {
+
             g.setColor(Color.red);
             programCurrentTime = System.currentTimeMillis();
             elapsedTime = (programCurrentTime - programStartTime);
@@ -457,10 +453,11 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
      * @param g The graphics object.
      */
     private void drawGame(Graphics g) {
+
         //Draw the menu panels on the sides. Their widths will be equal to the width of a button.
         g.setColor(SIDEPANEL_COLOUR);
         g.fillRect(0, 0, BUTTON_WIDTH, size.height);
-        g.fillRect(size.width-BUTTON_WIDTH, 0, BUTTON_WIDTH, size.height);
+        g.fillRect(size.width - BUTTON_WIDTH, 0, BUTTON_WIDTH, size.height);
 
         //Draw the game grids.
         gameGrid.draw(g);
@@ -471,7 +468,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
      * Sets up the animationTimer.
      */
     private void setupAnimationTimer() {
-        //Calculate time to delay.
+        //Calculate time to delay in order to achieve target FPS.
         delayTime = 1000/TARGET_FPS;
 
         //Calculate how much to multiply speed to ensure consistency.
@@ -500,7 +497,6 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        //Check if the action we are receiving is from the dropTimer.
         if (e.getSource() == animationTimer) {
             //Time to repaint the panel.
             framesDrawn++;
@@ -515,25 +511,27 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     }
 
     /**
-     * Drop the gamepiece by one cell/row. Also detects when it has hit the bottom.
+     * Drop the Tetrimino by one cell/row. Detects when the Tetrimino has hit the ground, at which point it is out of
+     * play. Also detects when Tetrimino lands on the Terminal line of the game grid, at which point the game is over.
      */
     private void dropGamePiece() {
-        if (currentGamePiece != null) {
-            boolean canDropDown = currentGamePiece.moveDown();
+
+        if (currentTetrimino != null) {
+            boolean canDropDown = currentTetrimino.moveDown();
 
             //Land the game piece.
             if (canDropDown == false) {
                 //Release all of the blocks that were formerly a part of the piece.
-                currentGamePiece.releaseGamePiece();
+                currentTetrimino.releaseGamePiece();
                 //Use the next game piece.
-                currentGamePiece = nextGamePiece;
-                movePieceToGameGrid(currentGamePiece);
+                currentTetrimino = nextTetrimino;
+                movePieceToGameGrid(currentTetrimino);
 
                 //Remove all blocks from the side grid panel.
                 sideGrid.removeAllBlocks();
                 //Generate a new piece that will be next in line.
-                nextGamePiece = new GamePiece(sideGrid);
-                nextGamePiece.generateNewPiece();
+                nextTetrimino = new Tetrimino(sideGrid);
+                nextTetrimino.generateNewPiece();
                 
                 //Check to see if any line was formed. If yes, add to score and delete row.
                 checkLinesFormed();
@@ -549,28 +547,30 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
 
     /**
-     * Move the current game piece to the game grid.
-     * @param gamePiece The game piece to move.
+     * Move the upcoming Tetrimino to the game grid.
+     * @param tetrimino The Tetrimino to move.
      */
-    private void movePieceToGameGrid(GamePiece gamePiece) {
+    private void movePieceToGameGrid(Tetrimino tetrimino) {
+
         //Change the grid from the sideGrid to the gameGrid.
-        gamePiece.changeGrid(gameGrid);
+        tetrimino.changeGrid(gameGrid);
 
         //Move up so that it initially starts outside and above of the game grid.
-        for (int i = 0; i < gamePiece.getSIZE(); i ++) {
-            gamePiece.moveUp();
+        for (int i = 0; i < tetrimino.getSIZE(); i ++) {
+            tetrimino.moveUp();
         }
 
-        //Center the game piece, as much as possible.
-        int gridWidth = gamePiece.getGrid().getColumns();
+        //Center the Tetrimino, as much as possible.
+        int gridWidth = tetrimino.getGrid().getColumns();
         int offsetX = (gridWidth-(4))/2;
         for (int i = 0; i < offsetX; i ++) {
-            gamePiece.moveRight();
+            tetrimino.moveRight();
         }
     }
 
     /**
-     * Checks to see if any horizontal line was formed on the grid.
+     * Checks to see if any horizontal line of blocks was formed on the grid. If a line was formed, delete all of the
+     * blocks in that row, increase the score, and drop all of the blocks that are above that row by one cell.
      */
     private void checkLinesFormed() {
     	int rows = gameGrid.getRows();
@@ -599,6 +599,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
      * @param e The mouse event.
      */
     private void checkButtonsClicked(MouseEvent e) {
+
         //Get the button that was pressed, if any.
         TextComponent clickedButton = buttonManager.getClickedButton(e);
 
@@ -694,7 +695,6 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
                 //Go to the main menu.
                 goToMainMenu();
             }
-
         }
     }
 
@@ -709,12 +709,13 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
     @Override
     public void mouseMoved(MouseEvent e) {
+
     	//Update the state of the buttons depending on if the mouse is hovering over them.
     	buttonManager.updateButtonStates(e);
 
     	//Send to the overlay, if it exists.
         if (menuOverlay != null) {
-        menuOverlay.updateButtonStates(e);
+            menuOverlay.updateButtonStates(e);
         }
 
         //Store the mouse event.
@@ -732,24 +733,24 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     @Override
 	public void keyPressed(KeyEvent e) {
         if (state == State.GAME_ON) {
-            //Only move when the game is not paused.
+            //Only move Tetrimino when the game is not paused.
             if (pauseGame == false) {
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                    currentGamePiece.moveLeft();
+                    currentTetrimino.moveLeft();
                 } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                    currentGamePiece.moveRight();
+                    currentTetrimino.moveRight();
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                     dropGamePiece();
                 } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    currentGamePiece.rotate();
+                    currentTetrimino.rotate();
                 }
                 //Make sure nothing is out of bounds.
-                currentGamePiece.stayWithinBounds();
+                currentTetrimino.stayWithinBounds();
             }
         }
 	}
     
-    /*	Unused inherited methods. Why are we forced to implement them if we are not gonna use them?? Doesn`t make sense!	*/
+    /*	Unused inherited methods.   */
     @Override
     public void mouseClicked(MouseEvent e) {
 

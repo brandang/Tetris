@@ -3,38 +3,44 @@ import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * This class represents a Tetrimino. A Tetrimino is a game piece that the user can control.
- * It is made up of many blocks, which form shapes. Once the Tetrimino has 'landed', however, the blocks are
- * declared to be no longer a part of the Tetrimino, and the Tetrimino is destroyed as an entity
+ * This class represents a Tetromino. A Tetromino is a game piece that the user can control.
+ * It is made up of many blocks, which form shapes. Once the Tetromino has 'landed', however, the blocks are
+ * declared to be no longer a part of the Tetromino, and the Tetromino is destroyed as an entity
  * (although its blocks will remain).
  *
- * Each Tetrimino will be contained within a 4 by 4 grid.
+ * Each Tetromino will be contained within a 4 by 4 grid.
  * The pivot around which the game piece rotates is the center of the 4 by 4 grid.
  *
  */
-public class Tetrimino {
+public class Tetromino {
 
-    //The colour of the Tetrimino. All of the blocks in the Tetrimino will inherit this.
+    //The colour of the Tetromino. All of the blocks in the Tetromino will inherit this.
     private Color colour;
 
-    //The Grid object that the Tetrimino is on.
+    //The Grid object that the Tetromino is on.
     private Grid grid;
 
     //Reference to all of the blocks on the grid, obtained from Grid object.
-    //This allows this Tetrimino to modify the blocks in the Grid.
+    //This allows this Tetromino to modify the blocks in the Grid.
     private ArrayList<Block> gridBlocks = new ArrayList<>(0);
 
-    //All of the blocks that are a part of the Tetrimino. Will include some of the blocks found in 'gridBlocks'.
+    //All of the blocks that are a part of the Tetromino. Will include some of the blocks found in 'gridBlocks'.
     private ArrayList<Block> gamePieceBlocks = new ArrayList<>(0);
+
+    //The block in the Tetromino that acts as the origin, the point at which to rotate around.
+    private Block origin;
 
     //The maximum number of blocks that can be placed end to end horizontally or vertically.
     final private static int SIZE = 4;
 
+    //Whether or not the Tetromino has been generated yet.
+    private boolean generated = false;
+
     /**
-     * Constructor. Creates a new Tetrimino.
-     * @param grid The Grid that will hold this Tetrimino.
+     * Constructor. Creates a new Tetromino.
+     * @param grid The Grid that will hold this Tetromino.
      */
-    public Tetrimino(Grid grid) {
+    public Tetromino(Grid grid) {
 
         this.grid = grid;
         //Get the arrayList of Blocks from the Grid object. This allows us to modify the blocks in the Grid from here.
@@ -108,6 +114,8 @@ public class Tetrimino {
             Block block = new Block(1,0,colour);
             gamePieceBlocks.add(block);
             block = new Block(1,1,colour);
+            //This block will act as the origin around which to rotate.
+            origin = block;
             gamePieceBlocks.add(block);
             block = new Block(1,2,colour);
             gamePieceBlocks.add(block);
@@ -119,6 +127,8 @@ public class Tetrimino {
             Block block = new Block(2,0,colour);
             gamePieceBlocks.add(block);
             block = new Block(2,1,colour);
+            //This block will act as the origin around which to rotate.
+            origin = block;
             gamePieceBlocks.add(block);
             block = new Block(2,2,colour);
             gamePieceBlocks.add(block);
@@ -130,6 +140,8 @@ public class Tetrimino {
             Block block = new Block(1,0,colour);
             gamePieceBlocks.add(block);
             block = new Block(1,1,colour);
+            //This block will act as the origin around which to rotate.
+            origin = block;
             gamePieceBlocks.add(block);
             block = new Block(1,2,colour);
             gamePieceBlocks.add(block);
@@ -189,6 +201,8 @@ public class Tetrimino {
 
         //Add this game piece to the Grid to be drawn.
         addBlocksToGrid();
+
+        generated = true;
     }
 
     /**
@@ -227,29 +241,31 @@ public class Tetrimino {
     }
 
     /**
-     * Rotates the game piece 90 degrees clockwise.
+     * Rotates the game piece 90 degrees counter-clockwise, if the Tetromino has been generated.
      */
     public void rotate() {
 
-        /*
-        This method is very complex and difficult!
-        There are soooo many potential problems.
-        Firstly, when rotated, the game piece may collide with other blocks. We need to prevent rotation if it
-        is not possible to do so. Therefore, create a copy of all of the blocks in the piece, and apply the rotation to them.
-        Check to see if the rotation results in any overlaps/collisions with other blocks. If no, it is safe
-        to rotate.
-        */
+        //Can only rotate if the Tetromino has been created.
+        if (generated) {
 
-        //Get copy.
-        ArrayList<Block> tempBlocks = copyBlocks(gamePieceBlocks);
-        //Attempt to rotate these blocks.
-        boolean success = attemptRotate(tempBlocks);
+            /*
+            There are many potential problems that would prevent a Tetromino from being rotated. First of all,
+            the Tetromino may collide with other blocks. If it is not possible to rotate, prevent it from doing so. Do this
+            by creating a copy of all the blocks in the Tetromino, and then applying a rotation to them. Finally, check to
+            if the rotation results in any overlaps/collisions with other blocks. If no, it is safe
+            to rotate.
+             */
 
-        //Successful; actually rotate now.
-        if (success == true) {
-            attemptRotate(gamePieceBlocks);
+            //Get copy.
+            ArrayList<Block> tempBlocks = copyBlocks(gamePieceBlocks);
+            //Attempt to rotate these blocks.
+            boolean success = attemptRotate(tempBlocks);
+
+            //Successful; actually rotate now.
+            if (success == true) {
+                attemptRotate(gamePieceBlocks);
+            }
         }
-
     }
 
     /**
@@ -258,6 +274,7 @@ public class Tetrimino {
      * @return True if rotation successful, false if rotation resulted in overlaps.
      */
     private boolean attemptRotate(ArrayList<Block> blocks) {
+
         //Loop through each block.
         int offsetX = 1000;
         int offsetY = 1000;
@@ -270,6 +287,13 @@ public class Tetrimino {
          as well as rotate, which is not what we want. This is kinda like setting the 'pivot' (sorta) of where to
          rotate.
          */
+
+        /*
+        Problem: it is not possible to simply rotate the Tetromino based solely on it's block`s positions on the grid,
+        as doing so would also shift the Tetromino. Therefore, in order to solve this, rotation must be done around
+        an origin, which must be centered in the Tetromino.
+         */
+
         //Get left most and top most position.
         for (Block block : blocks) {
             if (block.getX() < offsetX) {

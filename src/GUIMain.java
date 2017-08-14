@@ -34,7 +34,7 @@ public class GUIMain implements Runnable{
 	fix glitch where block has 'landed' when in reality it has just hit the side of another block
 	fix glitch when gameover and the menu button dissapears
 
-	Fix Grid dimensions in grid class and Gamepanel
+	fix glitch with initial i piece where it fails to rotate properly
 
 	 */
 	public static void main(String[] args) {

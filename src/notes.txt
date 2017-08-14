@@ -67,3 +67,88 @@ set new y = size - 1 - old x
         0010
         0000
          */
+
+Rotations around origin may not be perfect. To fix this, check to see if anything is outside of the localized grid,
+and shift entire Tetromino to compensate.
+
+0010
+0020
+0010
+0010
+
+0000
+01211 <- outside
+0000
+0000
+
+
+0010 0
+0010 1
+0010 2
+0010 3
+
+0000 0
+1111 1
+0000 2
+0000 3
+
+0000 0
+1111 1
+0000 2
+0000 3
+
+????///
+0010
+0010
+0110
+0000
+
+x = 0
+y = -1
+new x = -1 + 2 = 1
+new y = 0 + 1 = 1
+
+0000
+0111
+0001
+0000
+
+x = -1
+y = 0
+new x = 0 + 2 = 2
+new y = -1 + 1 = 0
+
+0000
+0111
+0001
+0000
+
+
+
+
+/////
+
+
+
+
+0110
+0110
+0000
+0000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

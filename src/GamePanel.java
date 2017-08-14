@@ -93,16 +93,16 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     //Manager for the textboxes.
     private TextComponentManager textBoxManager;
 
-    //The Tetriminos.
-    private Tetrimino currentTetrimino;
-    private Tetrimino nextTetrimino;
+    //The Tetrominoes.
+    private Tetromino currentTetromino;
+    private Tetromino nextTetromino;
 
     //The menu overlays for game over and pauseGame screens.
     private Overlay menuOverlay = null;
 
-    //Timer. Used to drop the Tetrimino by one cell after a set amount of time.
+    //Timer. Used to drop the Tetromino by one cell after a set amount of time.
     private Timer dropTimer;
-    //How long to wait before dropping Tetrimino again by one cell.
+    //How long to wait before dropping Tetromino again by one cell.
     private int dropTime;
     final private static int INITIAL_DROP_TIME = 500;
 
@@ -246,7 +246,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     	//Update the buttons.
     	buttonManager.removeAllComponents();
     	//Menu button that will be in top right corner of the screen.
-    	but1 = new Button(size.width-BUTTON_WIDTH, 0, BUTTON_WIDTH, BUTTON_HEIGHT, "Menu",
+    	but1 = new Button(size.width - BUTTON_WIDTH, 0, BUTTON_WIDTH, BUTTON_HEIGHT, "Menu",
                 PRIMARY_BUTTON_COLOUR, SECONDARY_BUTTON_COLOUR);
     	buttonManager.addComponent(but1);
         buttonManager.prepareButtons(previousMouseEvent);
@@ -254,11 +254,11 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     	//Create a game grid.
     	gameGrid = new Grid(BUTTON_WIDTH,0, 10,16);
     	gameGrid.setDrawTerminalLine(true);
-    	//Grid to display upcoming Tetrimino.
+    	//Grid to display upcoming Tetromino.
     	sideGrid = new Grid(50,200,4,4);
 
     	//Text descriptions and displays.
-        textBox1 = new TextBox(50,100,200,100, "Next Tetrimino");
+        textBox1 = new TextBox(50,100,200,100, "Next Tetromino");
         textBox1.setTextAlignment(TextBox.TEXT_ALIGN_CENTER);
         textBox1.setTopPadding(50);
         textBox2 = new TextBox((int) size.getWidth() - BUTTON_WIDTH, 200, BUTTON_WIDTH, 100, "Score: 0");
@@ -267,13 +267,13 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         textBoxManager.addComponent(textBox1);
         textBoxManager.addComponent(textBox2);
 
-        //Create the Tetrimino that is next in line.
-        nextTetrimino = new Tetrimino(sideGrid);
-        nextTetrimino.generateNewPiece();
+        //Create the Tetromino that is next in line.
+        nextTetromino = new Tetromino(sideGrid);
+        nextTetromino.generateNewPiece();
 
-        //Create the first Tetrimino.
-        currentTetrimino = new Tetrimino(gameGrid);
-        currentTetrimino.generateNewPiece();
+        //Create the first Tetromino.
+        currentTetromino = new Tetromino(gameGrid);
+        currentTetromino.generateNewPiece();
 
         //Set initial variables.
         dropTime = INITIAL_DROP_TIME;
@@ -511,27 +511,27 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     }
 
     /**
-     * Drop the Tetrimino by one cell/row. Detects when the Tetrimino has hit the ground, at which point it is out of
-     * play. Also detects when Tetrimino lands on the Terminal line of the game grid, at which point the game is over.
+     * Drop the Tetromino by one cell/row. Detects when the Tetromino has hit the ground, at which point it is out of
+     * play. Also detects when Tetromino lands on the Terminal line of the game grid, at which point the game is over.
      */
     private void dropGamePiece() {
 
-        if (currentTetrimino != null) {
-            boolean canDropDown = currentTetrimino.moveDown();
+        if (currentTetromino != null) {
+            boolean canDropDown = currentTetromino.moveDown();
 
             //Land the game piece.
             if (canDropDown == false) {
                 //Release all of the blocks that were formerly a part of the piece.
-                currentTetrimino.releaseGamePiece();
+                currentTetromino.releaseBlocks();
                 //Use the next game piece.
-                currentTetrimino = nextTetrimino;
-                movePieceToGameGrid(currentTetrimino);
+                currentTetromino = nextTetromino;
+                movePieceToGameGrid(currentTetromino);
 
                 //Remove all blocks from the side grid panel.
                 sideGrid.removeAllBlocks();
                 //Generate a new piece that will be next in line.
-                nextTetrimino = new Tetrimino(sideGrid);
-                nextTetrimino.generateNewPiece();
+                nextTetromino = new Tetromino(sideGrid);
+                nextTetromino.generateNewPiece();
                 
                 //Check to see if any line was formed. If yes, add to score and delete row.
                 checkLinesFormed();
@@ -547,24 +547,24 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
 
     /**
-     * Move the upcoming Tetrimino to the game grid.
-     * @param tetrimino The Tetrimino to move.
+     * Move the upcoming Tetromino to the game grid.
+     * @param tetromino The Tetromino to move.
      */
-    private void movePieceToGameGrid(Tetrimino tetrimino) {
+    private void movePieceToGameGrid(Tetromino tetromino) {
 
         //Change the grid from the sideGrid to the gameGrid.
-        tetrimino.changeGrid(gameGrid);
+        tetromino.changeGrid(gameGrid);
 
         //Move up so that it initially starts outside and above of the game grid.
-        for (int i = 0; i < tetrimino.getSIZE(); i ++) {
-            tetrimino.moveUp();
+        for (int i = 0; i < tetromino.getSIZE(); i ++) {
+            tetromino.moveUp();
         }
 
-        //Center the Tetrimino, as much as possible.
-        int gridWidth = tetrimino.getGrid().getColumns();
+        //Center the Tetromino, as much as possible.
+        int gridWidth = tetromino.getGrid().getColumns();
         int offsetX = (gridWidth-(4))/2;
         for (int i = 0; i < offsetX; i ++) {
-            tetrimino.moveRight();
+            tetromino.moveRight();
         }
     }
 
@@ -733,19 +733,19 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     @Override
 	public void keyPressed(KeyEvent e) {
         if (state == State.GAME_ON) {
-            //Only move Tetrimino when the game is not paused.
+            //Only move Tetromino when the game is not paused.
             if (pauseGame == false) {
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                    currentTetrimino.moveLeft();
+                    currentTetromino.moveLeft();
                 } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                    currentTetrimino.moveRight();
+                    currentTetromino.moveRight();
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                     dropGamePiece();
                 } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    currentTetrimino.rotate();
+                    currentTetromino.rotate();
                 }
                 //Make sure nothing is out of bounds.
-                currentTetrimino.stayWithinBounds();
+                currentTetromino.stayWithinBounds();
             }
         }
 	}

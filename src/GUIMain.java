@@ -1,42 +1,13 @@
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-/*
-NOTES:
-I originally intended to add a few more features to this program. However, I am unable to, due to time constraints.
-I have fixed all of the bugs that I have found, but due to the size and complexity of this program (WHY DID I
-OVER COMPLICATE EVERYTHING??!), there may be some bugs that I have not murdered yet :)
-Also, some parts are not very well commented, because I don`t really know how to explain them using words.
- */
-
 /**
  * The only purpose of this class is to create and display the main
  * window. 
- * Implements Runnable, which means it can run in a separate thread.
- * Runnable objects must have a method called "run".
+ * Implements Runnable, to run in a separate thread.
  */
 public class GUIMain implements Runnable{
 
-	/*
-	To do
-
-	To make this rotate properly:
-
-	Here is possibility 1:
-	rotate around a pivot (the pivot should be centered as much as possible)
-	if rotation possible, than rotate
-	else, if it is not possible, shift it left/right until it is possible
-	if it is still not possible, than rotation is impossible
-
-	OR: keep on doing the above three times (for three rotations)
-	if all of them fails, then there is no way to rotate it
-
-	fix glitch where block has 'landed' when in reality it has just hit the side of another block
-	fix glitch when gameover and the menu button dissapears
-
-	fix glitch with initial i piece where it fails to rotate properly
-
-	 */
 	public static void main(String[] args) {
 		//Use invokeLater command to tell Java to create GUI in separate thread, specifically, the Event Dispatching Thread.
 		//It does this by calling the run method.

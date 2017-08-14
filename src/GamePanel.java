@@ -22,13 +22,13 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     //Text that displays in the 'Controls Screen.'
     final private static String CONTROLS_TEXT = "The controls of this game are simple. To play the game use the" +
             " keyboard, only the arrow keys need to be used. The left and right arrow keys are used to move the Tetris " +
-            "game piece. The up key is to rotate the game piece 90 degrees counter-clockwise, while the down key is to " +
-            " drop the game piece to the ground.";
+            "Tetromino. The up key is to rotate the Tetromino 90 degrees counter-clockwise, while the down key is to " +
+            " drop the Tetromino to the ground.";
 
     //Text that displays the Instructions.
     final private static String INSTRUCTIONS_TEXT = "Tetris!!! This game is my version of the popular puzzle game. The" +
-            " objective is to move and rotate game pieces to manipulate where they land. Once a game piece lands, " +
-            "a next game piece is randomly chosen. When a full horizontal line of blocks is formed on the grid, " +
+            " objective is to move and rotate Tetrominoes to manipulate where they land. Once a Tetromino lands, " +
+            "a next Tetromino is randomly chosen. When a full horizontal line of blocks is formed on the grid, " +
             "that row is deleted. All of the blocks above that line will fall down by one cell. One point is earned" +
             " from this. The game ends when any block lands on the terminal line at the top of the grid." +
             " Good luck, and have FUN!";
@@ -78,7 +78,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
     //The main game grid.
     private Grid gameGrid;
-    //The side grid to display the next game piece.
+    //The side grid to display the next Tetromino.
     private Grid sideGrid;
 
     //The button manager, to manage the buttons.
@@ -150,6 +150,9 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     	//Set the state.
         updateState(State.MAIN_MENU);
 
+        //Remove all TextComponents.
+        removeAllComponents();
+
     	//Get the center of the screen.
     	int centerX = (int) (size.getWidth() / 2);
     	
@@ -183,6 +186,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
     	//Set the state.
     	updateState(State.HOW_TO_PLAY);
+    	removeAllComponents();
     	
     	//Get the center of the screen.
     	int centerX = (int) (size.getWidth()/2);
@@ -215,6 +219,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
     	//Update game state.
         updateState(State.CONTROLS);
+        removeAllComponents();
     	
     	//Get the center of the screen.
     	int centerX = (int) (size.getWidth()/2);
@@ -242,7 +247,8 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     	
     	//Update the game state.
         updateState(State.GAME_ON);
-    	
+        removeAllComponents();
+
     	//Update the buttons.
     	buttonManager.removeAllComponents();
     	//Menu button that will be in top right corner of the screen.
@@ -283,11 +289,17 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
     /**
      * Method that needs to be called whenever the game screen/state changes; for example, it must be called when the
-     * program goes to the main menu. This method deletes all text boxes and buttons used in the previous screen/state.
+     * program goes to the main menu.
      * @param newState The new state in which to change into.
      */
     private void updateState(State newState) {
         state = newState;
+    }
+
+    /**
+     * This method deletes all text boxes and buttons used in the previous screen/state.
+     */
+    private void removeAllComponents() {
         buttonManager.removeAllComponents();
         textBoxManager.removeAllComponents();
     }
@@ -519,11 +531,11 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         if (currentTetromino != null) {
             boolean canDropDown = currentTetromino.moveDown();
 
-            //Land the game piece.
+            //Land the Tetromino.
             if (canDropDown == false) {
                 //Release all of the blocks that were formerly a part of the piece.
                 currentTetromino.releaseBlocks();
-                //Use the next game piece.
+                //Use the next Tetromino.
                 currentTetromino = nextTetromino;
                 movePieceToGameGrid(currentTetromino);
 

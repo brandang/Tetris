@@ -47,6 +47,20 @@ public class Grid {
         setDrawTerminalLine(false);
     }
 
+    /*
+    //TEST
+    public void test() {
+        for (int i = 0; i < rows; i ++) {
+            Block block = new Block(0,i,Color.WHITE);
+            block.setPartOfGamePiece(false);
+            getBlocks().add(block);
+            block = new Block(3,i,Color.WHITE);
+            block.setPartOfGamePiece(false);
+            getBlocks().add(block);
+        }
+    }
+    */
+
     /**
      * Draw the grid.
      */
@@ -125,7 +139,7 @@ public class Grid {
 
     /**
      * Checks to see if there is a full horizontal line made up of blocks
-     * in the specified row. Does not count blocks that are considered to be part of a game piece.
+     * in the specified row. Does not count blocks that are considered to be part of a Tetromino.
      * @param row The row in which to check.
      * @return True for yes, false for no.
      */
@@ -176,7 +190,7 @@ public class Grid {
     
     /**
      * Checks to see if any block is on the terminal line. Does not count blocks that are considered to be a part of
-     * a game piece.
+     * a Tetromino.
      * @return True if yes, false for no.
      */
     public boolean blockOnTerminalLine() {
@@ -193,13 +207,13 @@ public class Grid {
 
     /**
      * Method that needs to be called when a row is deleted.
-     * Drops all of the blocks above the row by one unit (as long as it is not a part of a game piece).
+     * Drops all of the blocks above the row by one unit (as long as it is not a part of a Tetromino).
      * @param row The row that was just deleted.
      */
     public void dropBlocks(int row) {
 
         for (Block block : blocks) {
-            //Make sure its not a part of a game piece.
+            //Make sure its not a part of a Tetromino.
             if (block.isPartOfGamePiece() == false) {
                 //Move all blocks above down.
                 if (block.getY() < row) {

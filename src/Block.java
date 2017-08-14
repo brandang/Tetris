@@ -38,7 +38,7 @@ public class Block {
         this.y = y;
         this.colour = colour;
 
-        //By default, make it so that it is a part of a game piece.
+        //By default, make it so that it is a part of a Tetromino.
         setPartOfGamePiece(true);
     }
 
@@ -78,7 +78,7 @@ public class Block {
     /*  Getters and Setters */
 
     /**
-     * Returns whether or not this block is currently a part of the game piece.
+     * Returns whether or not this block is currently a part of the Tetromino.
      * @return True for yes, false for no.
      */
     public boolean isPartOfGamePiece() {
@@ -86,7 +86,7 @@ public class Block {
     }
 
     /**
-     * Set whether or not this block is currently a part of a game piece.
+     * Set whether or not this block is currently a part of a Tetromino.
      * @param b True for yes, false for no.
      */
     public void setPartOfGamePiece(boolean b) {

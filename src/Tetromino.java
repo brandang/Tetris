@@ -9,7 +9,7 @@ import java.util.Random;
  * (although its blocks will remain).
  *
  * Each Tetromino will be contained within a 4 by 4 grid.
- * The pivot around which the game piece rotates is the center of the 4 by 4 grid.
+ * The pivot around which the Tetromino rotates is the center of the 4 by 4 grid.
  *
  */
 public class Tetromino {
@@ -48,7 +48,7 @@ public class Tetromino {
     }
 
     /**
-     * Creates a random new game piece with a random shape, a random colour, and a random orientation.
+     * Creates a random new Tetromino with a random shape, a random colour, and a random orientation.
      */
     public void generateNewPiece() {
 
@@ -59,9 +59,6 @@ public class Tetromino {
 
         //Secondly, generate a random shape, based on number.
         int gen = random.nextInt(7);
-
-        //TEST
-        gen = 0;
 
         /*
         There are 7 types of blocks that can be generated, shown below. Let 0 represent empty space and 1
@@ -210,7 +207,7 @@ public class Tetromino {
             rotate();
         }
 
-        //Add this game piece to the Grid to be drawn.
+        //Add this Tetromino to the Grid to be drawn.
         addBlocksToGrid();
 
         generated = true;
@@ -252,7 +249,7 @@ public class Tetromino {
     }
 
     /**
-     * Rotates the game piece 90 degrees counter-clockwise, if the Tetromino has been generated.
+     * Rotates the Tetromino 90 degrees counter-clockwise, if the Tetromino has been generated.
      */
     public void rotate() {
 
@@ -263,14 +260,14 @@ public class Tetromino {
             There are many potential problems that would prevent a Tetromino from being rotated. First of all,
             the Tetromino may collide with other blocks. If it is not possible to rotate, prevent it from doing so. Do this
             by creating a copy of all the blocks in the Tetromino, and then applying a rotation to them. Finally, check to
-            if the rotation results in any overlaps/collisions with other blocks. If no, it is safe
-            to rotate.
+            if the rotation results in any overlaps/collisions with other blocks. If no, it is safe to rotate.
              */
 
             //Get copy.
             ArrayList<Block> tempBlocks = copyBlocks(gamePieceBlocks);
             //Attempt to rotate these blocks.
             boolean success = attemptRotate(tempBlocks,true);
+            System.out.println("it was " + success);
 
             //Successful; actually rotate now.
             if (success == true) {
@@ -286,29 +283,10 @@ public class Tetromino {
      * Tetromino is out of bounds and is shifted to compensate after rotation.
      * @return True if rotation successful, false if rotation resulted in overlaps.
      */
-    private boolean attemptRotate(ArrayList<Block> blocks ,boolean updateOrigin) {
-
-        //Loop through each block.
-//        int offsetX = 1000;
-//        int offsetY = 1000;
+    private boolean attemptRotate(ArrayList<Block> blocks, boolean updateOrigin) {
 
         /*
-        Problem: we cant rotate the entire 'grid', as it will lead to unexpected results. Instead, we need to do a
-        'localized' rotation - that is, rotate just around the game piece. Its kinda hard to explain.
-         Offset represents the locations of the left most block and the top most blocks in the game piece.
-         We rotate starting from there. If we instead start rotating from (0,0), the game piece will most likely shift
-         as well as rotate, which is not what we want. This is kinda like setting the 'pivot' (sorta) of where to
-         rotate.
-         */
-
-        /*
-        Problem: it is not possible to simply rotate the Tetromino based solely on it's block`s positions on the grid,
-        as doing so would also shift the Tetromino. Therefore, in order to solve this, rotation must be done around
-        an origin, which must be centered in the Tetromino. The origin must be at (0, 0) in order to rotate properly.
-        Therefore,
-         */
-
-        /*System.out.println(originX);
+        System.out.println(originX);
         int offsetX = -((int) originX);
         int offsetY = -((int) originY);
 
@@ -328,6 +306,16 @@ public class Tetromino {
             block.setX(newX);
             block.setY(newY);
         }*/
+
+
+        /*
+        Problem: it is not possible to simply rotate the Tetromino based solely on it's block`s positions on the grid,
+        as doing so would also shift the Tetromino. Therefore, in order to solve this, rotation must be done around
+        an origin, which must be centered in the Tetromino. The origin must be at (0, 0) in order to rotate properly.
+        Therefore, each of the blocks must be translated in relation with the origin. The Tetromino must be translated
+        so that the origin is moved to (0, 0).
+         */
+
         //Loop through all the blocks in the Tetromino.
         for (Block block : blocks) {
 
@@ -368,7 +356,8 @@ public class Tetromino {
         }
 
 
-        /*//Get left most and top most position.
+        /*
+        //Get left most and top most position.
         for (Block block : blocks) {
             if (block.getX() < offsetX) {
                 offsetX = block.getX();
@@ -423,13 +412,45 @@ public class Tetromino {
             keepWithinGrid(blocks);
         }
 
-        //Make sure its not touching any stationary blocks.
+        //TEST
+        /*//Make sure its not touching any stationary blocks.
         if (hasCollided(blocks) == true) {
             return false;
         }
         else {
             return true;
+        }*/
+
+        if (hasCollided(blocks)) {
+            for (int i = 0; i < 2; i ++) {
+                System.out.println("right");
+                if (updateOrigin == false) {
+                    Point temp = (Point) origin.clone();
+                    shiftRight(blocks);
+                    origin = temp;
+                }
+                if (hasCollided(blocks) == false) {
+                    return true;
+                }
+            }
+            if (hasCollided(blocks)) {
+                for (int i = 0; i < 4; i ++) {
+                    System.out.println("left");
+                    if (updateOrigin == false) {
+                        Point temp = (Point) origin.clone();
+                        shiftRight(blocks);
+                        origin = temp;
+                    }
+                    if (hasCollided(blocks) == false) {
+                        return true;
+                    }
+                }
+            }
         }
+        if (hasCollided(blocks)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -439,7 +460,7 @@ public class Tetromino {
      */
     private boolean hasCollided(ArrayList<Block> blocks) {
         for (Block gamePieceBlock : blocks) {
-            //Check with finsihed bocks
+            //Check with stationary blocks.
             for (Block stationaryBlock : gridBlocks) {
                 if (stationaryBlock.isPartOfGamePiece() == false) {
 
@@ -461,7 +482,7 @@ public class Tetromino {
     }*/
 
     /**
-     * Keeps the game piece within bounds.
+     * Keeps the Tetromino within bounds.
      */
     public void stayWithinBounds() {
         keepWithinGrid(gamePieceBlocks);
@@ -489,8 +510,8 @@ public class Tetromino {
                 shiftUp(blocks);
             }
 
-            //Note that we don`t have to check for collision with the top since there is no way that the user can move
-            // the piece up.
+            //Note that we don`t have to check for collision with the top since it is considered that the top is not
+            // boundary.
         }
     }
 
@@ -510,14 +531,14 @@ public class Tetromino {
     }
 
     /**
-     * Move the game piece one cell up.
+     * Move the Tetromino one cell up.
      */
     public void moveUp() {
         shiftUp(gamePieceBlocks);
     }
 
     /**
-     * Move the game piece one cell left, if possible.
+     * Move the Tetromino one cell left, if possible.
      */
     public void moveLeft() {
         if (canShiftLeft() == true) {
@@ -526,7 +547,7 @@ public class Tetromino {
     }
 
     /**
-     * Move the game piece one cell right, if possible.
+     * Move the Tetromino one cell right, if possible.
      */
     public void moveRight() {
         if (canShiftRight() == true) {
@@ -535,7 +556,7 @@ public class Tetromino {
     }
 
     /**
-     * Moves the game piece down one row/cell on the grid.
+     * Moves the Tetromino down one row/cell on the grid.
      */
     public void shiftDown(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -548,7 +569,7 @@ public class Tetromino {
     }
 
     /**
-     * Moves the game piece up one row/cell on the grid.
+     * Moves the Tetromino up one row/cell on the grid.
      */
     public void shiftUp(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -561,7 +582,7 @@ public class Tetromino {
     }
 
     /**
-     * Moves the game piece one column/cell left on the grid.
+     * Moves the Tetromino one column/cell left on the grid.
      */
     public void shiftLeft(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -574,7 +595,7 @@ public class Tetromino {
     }
 
     /**
-     * Moves the game piece one column/cell right on the grid.
+     * Moves the Tetromino one column/cell right on the grid.
      */
     public void shiftRight(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -587,7 +608,7 @@ public class Tetromino {
     }
 
     /**
-     * Determines whether or not the game piece can shift down.
+     * Determines whether or not the Tetromino can shift down.
      * @return True for yes, false for no.
      */
     private boolean canShiftDown() {
@@ -596,7 +617,7 @@ public class Tetromino {
             if (gamePieceBlock.getY() >= grid.getRows() - 1) {
                 return false;
             }
-            //Check with finsihed bocks
+            //Check with stationary blocks.
             for (Block stationaryBlock : gridBlocks) {
                 if (stationaryBlock.isPartOfGamePiece() == false) {
                     if (gamePieceBlock.getY() + 1 >= stationaryBlock.getY() && gamePieceBlock.getX() == stationaryBlock.getX()) {
@@ -609,7 +630,7 @@ public class Tetromino {
     }
 
     /**
-     * Determines whether or not the game piece can shift left.
+     * Determines whether or not the Tetromino can shift left.
      * @return True for yes, false for no.
      */
     private boolean canShiftLeft() {
@@ -631,7 +652,7 @@ public class Tetromino {
     }
 
     /**
-     * Determines whether or not the game piece can shift right.
+     * Determines whether or not the Tetromino can shift right.
      * @return True for yes, false for no.
      */
     private boolean canShiftRight() {
@@ -653,9 +674,9 @@ public class Tetromino {
     }
 
     /**
-     * Add this game piece to the game grid. Sets the position of the piece to the center of the grid, 4 cells above
+     * Add this Tetromino to the game grid. Sets the position of the piece to the center of the grid, 4 cells above
      * the top boundary.
-     * @param newGrid The game grid to add this game piece to.
+     * @param newGrid The game grid to add this Tetromino to.
      */
     public void changeGrid(Grid newGrid) {
 
@@ -664,13 +685,13 @@ public class Tetromino {
         //Get the new blocks.
         gridBlocks = grid.getBlocks();
 
-        //Add the blocks of this game piece to the grid.
+        //Add the blocks of this Tetromino to the grid.
         addBlocksToGrid();
 
     }
 
     /**
-     * Add all of the blocks belonging to this game piece to its Grid.
+     * Add all of the blocks belonging to this Tetromino to its Grid.
      */
     private void addBlocksToGrid() {
 //        System.out.println("before " + gridBlocks.size());
@@ -681,7 +702,7 @@ public class Tetromino {
     }
 
     /**
-     * Release the game piece: that means each block will no longer be associated with a game piece.
+     * Release the Tetromino: that means each block will no longer be associated with a Tetromino.
      */
     public void releaseBlocks() {
         for (Block block : gamePieceBlocks) {
@@ -714,7 +735,7 @@ public class Tetromino {
     }
 
     /**
-     * Gets all of the blocks in this game piece.
+     * Gets all of the blocks in this Tetromino.
      * @return The blocks, stored inside an arrayList.
      */
     public ArrayList<Block> getBlocks() {

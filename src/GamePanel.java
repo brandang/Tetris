@@ -1,11 +1,5 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.net.URI;
 
 import javax.swing.JPanel;
@@ -28,9 +22,9 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     //Text that displays the Instructions.
     final private static String INSTRUCTIONS_TEXT = "Tetris!!! This game is my version of the popular puzzle game. The" +
             " objective is to move and rotate Tetrominoes to manipulate where they land. Once a Tetromino lands, " +
-            "a next Tetromino is randomly chosen. When a full horizontal line of blocks is formed on the grid, " +
+            "a next Tetromino is randomly chosen. When a full horizontal line of blocks is formed on the Grid, " +
             "that row is deleted. All of the blocks above that line will fall down by one cell. One point is earned" +
-            " from this. The game ends when any block lands on the terminal line at the top of the grid." +
+            " from this. The game ends when any block lands on the terminal line at the top of the Grid." +
             " Good luck, and have FUN!";
 
     //Link to webpage that describes the game.
@@ -76,9 +70,9 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 	final static private int BUTTON_WIDTH = 300;
 	final static private int BUTTON_HEIGHT = 100;
 
-    //The main game grid.
+    //The main game Grid.
     private Grid gameGrid;
-    //The side grid to display the next Tetromino.
+    //The side Grid to display the next Tetromino.
     private Grid sideGrid;
 
     //The button manager, to manage the buttons.
@@ -111,6 +105,9 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
     //The score.
     private int score = 0;
+
+    //Whether or not the right mouse button is being held down.
+    private boolean rightButtonDown = false;
 
     /**
      * Constructor.
@@ -257,7 +254,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     	buttonManager.addComponent(but1);
         buttonManager.prepareButtons(previousMouseEvent);
     	
-    	//Create a game grid.
+    	//Create a game Grid.
     	gameGrid = new Grid(BUTTON_WIDTH,0, 10,16);
     	gameGrid.setDrawTerminalLine(true);
     	//Grid to display upcoming Tetromino.
@@ -285,6 +282,9 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         dropTime = INITIAL_DROP_TIME;
         setupDropTimer(dropTime);
         score = 0;
+        //Initially assume that the right mouse button is not pressed. This prevents Tetromino from rotating
+        //unnecessarily.
+        releaseRightMouseButton();
     }
 
     /**
@@ -294,6 +294,14 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
      */
     private void updateState(State newState) {
         state = newState;
+    }
+
+    /**
+     * Returns the current state the program is in.
+     * @return The state. Can be one of: MAIN_MENU,HOW_TO_PLAY, CONTROLS,GAME_ON, or GAME_OVER.
+     */
+    private State getState() {
+        return state;
     }
 
     /**
@@ -389,6 +397,15 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     }
 
     /**
+     * Updates the game. Calls actions on the current Tetromino in order to tell it to  drop, if necessary.
+     */
+    private void update() {
+        if (rightButtonDown == true && getState() == State.GAME_ON) {
+            dropTetromino();
+        }
+    }
+
+    /**
      * Overridden paint method. Draws on the window.
      */
     @Override
@@ -406,29 +423,29 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         g.fillRect(0, 0, size.width, size.height);
 
         //It is currently in the main menu.
-        if (state == State.MAIN_MENU) {
+        if (getState() == State.MAIN_MENU) {
             //Fill background.
             g.setColor(MENU_BACKGROUND_COLOUR);
             g.fillRect(0, 0, size.width, size.height);
         }
         //The game is currently operating.
-        else if (state == State.GAME_ON) {
+        else if (getState() == State.GAME_ON) {
         	drawGame(g);
         }
         //Game is currently in the controls screen.
-        else if (state == State.CONTROLS) {
+        else if (getState() == State.CONTROLS) {
             //Fill background.
             g.setColor(MENU_BACKGROUND_COLOUR);
             g.fillRect(0, 0, size.width, size.height);
         }
         //Instructions screen.
-        else if (state == State.HOW_TO_PLAY) {
+        else if (getState() == State.HOW_TO_PLAY) {
             //Fill background.
             g.setColor(MENU_BACKGROUND_COLOUR);
             g.fillRect(0, 0, size.width, size.height);
         }
         //The game is over.
-        else if (state == State.GAME_OVER) {
+        else if (getState() == State.GAME_OVER) {
             //Continue drawing the game, it's in the background.
             drawGame(g);
         }
@@ -461,7 +478,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     }
 
     /**
-     * Draws the game grids and the side panels for the game.
+     * Draws the game Grids and the side panels for the game.
      * @param g The graphics object.
      */
     private void drawGame(Graphics g) {
@@ -471,7 +488,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         g.fillRect(0, 0, BUTTON_WIDTH, size.height);
         g.fillRect(size.width - BUTTON_WIDTH, 0, BUTTON_WIDTH, size.height);
 
-        //Draw the game grids.
+        //Draw the game Grids.
         gameGrid.draw(g);
         sideGrid.draw(g);
     }
@@ -510,23 +527,24 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource() == animationTimer) {
-            //Time to repaint the panel.
+            //Time to update and repaint the panel.
             framesDrawn++;
+            update();
             repaint();
         }
         else if (e.getSource() == dropTimer) {
             //Only drop when the game is not paused.
             if (pauseGame == false) {
-                dropGamePiece();
+                dropTetromino();
             }
         }
     }
 
     /**
      * Drop the Tetromino by one cell/row. Detects when the Tetromino has hit the ground, at which point it is out of
-     * play. Also detects when Tetromino lands on the Terminal line of the game grid, at which point the game is over.
+     * play. Also detects when Tetromino lands on the Terminal line of the game Grid, at which point the game is over.
      */
-    private void dropGamePiece() {
+    private void dropTetromino() {
 
         if (currentTetromino != null) {
             boolean canDropDown = currentTetromino.moveDown();
@@ -539,7 +557,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
                 currentTetromino = nextTetromino;
                 movePieceToGameGrid(currentTetromino);
 
-                //Remove all blocks from the side grid panel.
+                //Remove all blocks from the side Grid panel.
                 sideGrid.removeAllBlocks();
                 //Generate a new piece that will be next in line.
                 nextTetromino = new Tetromino(sideGrid);
@@ -559,15 +577,15 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
 
     /**
-     * Move the upcoming Tetromino to the game grid.
+     * Move the upcoming Tetromino to the game Grid.
      * @param tetromino The Tetromino to move.
      */
     private void movePieceToGameGrid(Tetromino tetromino) {
 
-        //Change the grid from the sideGrid to the gameGrid.
+        //Change the Grid from the sideGrid to the gameGrid.
         tetromino.changeGrid(gameGrid);
 
-        //Move up so that it initially starts outside and above of the game grid.
+        //Move up so that it initially starts outside and above of the game Grid.
         for (int i = 0; i < tetromino.getSIZE(); i ++) {
             tetromino.moveUp();
         }
@@ -581,7 +599,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     }
 
     /**
-     * Checks to see if any horizontal line of blocks was formed on the grid. If a line was formed, delete all of the
+     * Checks to see if any horizontal line of blocks was formed on the Grid. If a line was formed, delete all of the
      * blocks in that row, increase the score, and drop all of the blocks that are above that row by one cell.
      */
     private void checkLinesFormed() {
@@ -616,7 +634,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         TextComponent clickedButton = buttonManager.getClickedButton(e);
 
         //The program is currently in the main menu.
-        if (state == State.MAIN_MENU) {
+        if (getState() == State.MAIN_MENU) {
             //User pressed 'Play'.
             if (but1 == clickedButton) {
                 //Start the game.
@@ -632,7 +650,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
             }
         }
         //The program is currently in the instructions menu.
-        else if (state == State.HOW_TO_PLAY) {
+        else if (getState() == State.HOW_TO_PLAY) {
             //User pressed 'More on Tetris'.
             if (but1 == clickedButton) {
                 //Open up a webpage that further describes the game.
@@ -653,40 +671,43 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
             }
         }
         //Program is in controls screen.
-        else if (state == State.CONTROLS) {
+        else if (getState() == State.CONTROLS) {
             //User clicked return to main menu.
             if (but1 == clickedButton) {
                 goToMainMenu();
             }
         }
         //The game is currently running.
-        else if (state == State.GAME_ON) {
+        else if (getState() == State.GAME_ON) {
             //User pressed the menu button.
             if (but1 == clickedButton) {
                 pauseGame();
                 createPauseMenu();
             }
-            //Get the button that was clicked from the overlay menu, if any.
-            TextComponent overlayButton = menuOverlay.getClickedButton(e);
-            //User pressed 'Resume'.
-            if (but2 == overlayButton) {
-                //Unpause the game.
-                resumeGame();
-                //Remove the overlay.
-                removeOverlay();
-            }
-            //User pressed 'Restart'.
-            else if (but3 == overlayButton) {
-                //Unpause the game.
-                resumeGame();
-                //Remove the overlay.
-                removeOverlay();
-                //Restart the game.
-                goToGame();
+            //Get the button that was clicked from the overlay menu, if any. Only do so if menu exists.
+            if (menuOverlay != null) {
+                TextComponent overlayButton = menuOverlay.getClickedButton(e);
+                System.out.println(overlayButton);
+                //User pressed 'Resume'.
+                if (but2 == overlayButton) {
+                    //Unpause the game.
+                    resumeGame();
+                    //Remove the overlay.
+                    removeOverlay();
+                }
+                //User pressed 'Restart'.
+                else if (but3 == overlayButton) {
+                    //Unpause the game.
+                    resumeGame();
+                    //Remove the overlay.
+                    removeOverlay();
+                    //Restart the game.
+                    goToGame();
+                }
             }
         }
         //Game is over.
-        else if (state == State.GAME_OVER) {
+        else if (getState() == State.GAME_OVER) {
             //Get the button that was clicked from the overlay menu, if any.
             TextComponent overlayButton = menuOverlay.getClickedButton(e);
             //User pressed 'Play Again'.
@@ -710,13 +731,48 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         }
     }
 
+    /**
+     * 'Release' the right mouse button. It will no longer be considered to be held down. This method must be called
+     * when user drags mouse outside of the game Grid, game starts, etc.
+     */
+    private void releaseRightMouseButton() {
+        rightButtonDown = false;
+    }
+
     /*  Events that are used. */
 
     @Override
+    public void mousePressed(MouseEvent e) {
+
+        //Game is operating.
+        if (getState() == State.GAME_ON) {
+            //Mouse is being pressed/released from inside the Grid.
+            if (gameGrid.isMouseInsideGrid(e) == true) {
+                //Right mouse button is being pressed:
+                if (e.getModifiers() == InputEvent.BUTTON3_MASK) {
+                    rightButtonDown = true;
+                }
+            }
+        }
+    }
+
+    @Override
     public void mouseReleased(MouseEvent e) {
+
         //The mouse has just been released; check to see what button was clicked.
         checkButtonsClicked(e);
         previousMouseEvent = e;
+
+        //Game is operating.
+        if (getState() == State.GAME_ON) {
+            //Mouse is being released from inside the Grid.
+            if (gameGrid.isMouseInsideGrid(e) == true) {
+                //Right mouse button is being released:
+                if (e.getModifiers() == InputEvent.BUTTON3_MASK) {
+                    rightButtonDown = false;
+                }
+            }
+        }
     }
 
     @Override
@@ -732,6 +788,17 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
         //Store the mouse event.
         previousMouseEvent = e;
+
+        //User input with game through the mouse.
+        if (getState() == State.GAME_ON) {
+            if (gameGrid.isMouseInsideGrid(e) == true) {
+                currentTetromino.moveToMouse(e);
+            }
+            //Mouse is outside of the game Grid: release the button to prevent further rotation.
+            else {
+                releaseRightMouseButton();
+            }
+        }
     }
 
     @Override
@@ -739,12 +806,37 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         //Interesting: when user holds down mouse while moving it, it is a mouseDragged event.
         //Update the state of the buttons depending on if the mouse is hovering over them.
         buttonManager.updateButtonStates(e);
+
+        //Send to the overlay, if it exists.
+        if (menuOverlay != null) {
+            menuOverlay.updateButtonStates(e);
+        }
+
+        //Store the mouse event.
         previousMouseEvent = e;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+        //User input with game through the mouse.
+        if (getState() == State.GAME_ON) {
+            //Mouse is inside of the Grid.
+            if (gameGrid.isMouseInsideGrid(e) == true) {
+                //Left mouse button is being clicked.
+                if (e.getModifiers() == InputEvent.BUTTON1_MASK) {
+                    //Rotate Tetromino.
+                    currentTetromino.rotate();
+                    //Rotation might have moved origin of the Tetromino. Move it back to mouse location.
+                    currentTetromino.moveToMouse(e);
+                }
+            }
+        }
     }
     
     @Override
 	public void keyPressed(KeyEvent e) {
-        if (state == State.GAME_ON) {
+        if (getState() == State.GAME_ON) {
             //Only move Tetromino when the game is not paused.
             if (pauseGame == false) {
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
@@ -752,7 +844,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
                 } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
                     currentTetromino.moveRight();
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    dropGamePiece();
+                    dropTetromino();
                 } else if (e.getKeyCode() == KeyEvent.VK_UP) {
                     currentTetromino.rotate();
                 }
@@ -763,15 +855,6 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 	}
     
     /*	Unused inherited methods.   */
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
 
     @Override
     public void mouseEntered(MouseEvent e) {

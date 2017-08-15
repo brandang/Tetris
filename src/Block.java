@@ -1,13 +1,13 @@
 import java.awt.*;
 /**
- * Class that represents a game block. It stores its position on the grid, and has methods to draw itself.
+ * Class that represents a game block. It stores its position on the Grid, and has methods to draw itself.
  */
 public class Block {
 
     //True if it is currently a part of a Tetromino, false if it is not.
     private boolean partOfGamePiece;
 
-    //The 'position' of the block on the game grid. The 'position' can be thought of as
+    //The 'position' of the block on the game Grid. The 'position' can be thought of as
     //the index in the 2D array. For example, a block in the top left corner has x = 0 and y = 0.
     private int x, y;
 
@@ -29,8 +29,8 @@ public class Block {
 
     /**
      * Constructor.
-     * @param x The x position of the block on the grid.
-     * @param y The y position of the block on the grid.
+     * @param x The x position of the block on the Grid.
+     * @param y The y position of the block on the Grid.
      * @param colour The fill colour of the block.
      */
     public Block(int x, int y, Color colour) {
@@ -44,18 +44,18 @@ public class Block {
 
     /**
      * Draws the block, according to the x and y positions of the block. Also account for the position
-     * of the grid relative to the game window, which is defined by offsetX and offsetY.
+     * of the Grid relative to the game window, which is defined by offsetX and offsetY.
      * @param g The graphics object.
-     * @param offsetX The left edge of the grid.
-     * @param offsetY The top edge of the grid.
+     * @param offsetX The left edge of the Grid.
+     * @param offsetY The top edge of the Grid.
      */
     public void draw(Graphics g, int offsetX, int offsetY) {
 
-        //Calculate where to draw the block in relation to the grid.
+        //Calculate where to draw the block in relation to the Grid.
         //Do this by multiplying the 'cell position' by the size of each block/cell.
         int realX = x* BLOCK_W;
         int realY = y* BLOCK_H;
-        //OffsetX and offsetY are needed because the grid does not necessarily
+        //OffsetX and offsetY are needed because the Grid does not necessarily
         //have a top left corner at (0,0) in the game window.
         //Add the offset to the positions.
         //Also add PADDING, to make sure block visually does not take up entire cell.
@@ -94,7 +94,7 @@ public class Block {
     }
 
     /**
-     * Set the x position within the grid.
+     * Set the x position within the Grid.
      * @param x The x index.
      */
     public void setX(int x) {
@@ -102,7 +102,7 @@ public class Block {
     }
 
     /**
-     * Set the y position within the grid.
+     * Set the y position within the Grid.
      * @param y The y index.
      */
     public void setY(int y) {
@@ -110,7 +110,7 @@ public class Block {
     }
 
     /**
-     * Get the x index within the grid.
+     * Get the x index within the Grid.
      * @return The x index.
      */
     public int getX() {
@@ -118,7 +118,7 @@ public class Block {
     }
 
     /**
-     * Get the y index within the grid.
+     * Get the y index within the Grid.
      * @return The y index.
      */
     public int getY() {

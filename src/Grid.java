@@ -1,19 +1,20 @@
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 /**
- * This class represents a grid in the game window. It is responsible for drawing and keeping track of all
- * the blocks on the grid.
+ * This class represents a Grid in the game window. It is responsible for drawing and keeping track of all
+ * the blocks on the Grid.
  */
 public class Grid {
 
-    //The positions of the grid.
+    //The positions of the Grid.
     private int x, y;
 
     //The number of rows and columns.
     private int rows, columns;
 
-    //All of the blocks in this grid.
+    //All of the blocks in this Grid.
     private ArrayList<Block> blocks = new ArrayList<>(0);
     
     //The colours to use in drawing.
@@ -22,7 +23,7 @@ public class Grid {
     final static private Color OUTLINE_COLOUR = Color.BLACK;
     final static private Color TERMINAL_LINE_COLOUR = new Color(161, 0, 4);
 
-    //The grid`s outline`s stroke width.
+    //The Grid`s outline`s stroke width.
     final static private int OUTLINE_WIDTH = 5;
 
     //Whether or not to draw the red terminal line at the top.
@@ -30,12 +31,15 @@ public class Grid {
     //Where the terminal line is.
     final private static int TERMINAL_LINE_ROW = 0;
 
+    //The size of each cell.
+    private int cellSize;
+
     /**
      * Constructor. Takes in positions and dimensions as parameters.
-     * @param x The left coordinate of the grid.
-     * @param y The top coordinate of the grid.
-     * @param columns The number of columns on the grid.
-     * @param rows The number of rows on the grid.
+     * @param x The left coordinate of the Grid.
+     * @param y The top coordinate of the Grid.
+     * @param columns The number of columns on the Grid.
+     * @param rows The number of rows on the Grid.
      */
     public Grid(int x, int y, int columns, int rows) {
         setX(x);
@@ -45,6 +49,7 @@ public class Grid {
 
         //Defaults.
         setDrawTerminalLine(false);
+        setCellSize(Block.getBlockWidth());
     }
 
     /*
@@ -62,7 +67,7 @@ public class Grid {
     */
 
     /**
-     * Draw the grid.
+     * Draw the Grid.
      */
     public void draw(Graphics g) {
         drawGrid(g);
@@ -70,15 +75,13 @@ public class Grid {
     }
 
     /**
-     * Draw the lines of the grid.
+     * Draw the lines of the Grid.
      * @param g The graphics object.
      */
     private void drawGrid(Graphics g) {
-        int blockWidth = Block.getBlockWidth();
-        int blockHeight = Block.getBlockHeight();
 
-        //Calculate dimensions of the grid.
-        Dimension size = new Dimension(blockWidth * columns, blockHeight * rows);
+        //Obtain dimensions of the Grid.
+        Dimension size = getGridDimensions();
 
         //Draw the background.
     	g.setColor(GRID_BACKGROUND_COLOUR);
@@ -87,28 +90,28 @@ public class Grid {
     	//Draw the terminal line.
         if (drawTerminalLine == true) {
             g.setColor(TERMINAL_LINE_COLOUR);
-            g.fillRect(x, y, size.width, blockHeight);
+            g.fillRect(x, y, size.width, getCellSize());
         }
 
-        //Offset is basically the top left position of this grid within the window.
+        //Offset is basically the top left position of this Grid within the window.
     	int offsetX = this.x;
     	int offsetY = this.y;
     	
     	g.setColor(GRID_LINES_COLOUR);
     	
-    	//Calculate the width and height of the grid in pixels.
-        int gridHeight = (blockHeight * rows);
-        int gridWidth = (blockWidth * columns);
+    	//Calculate the width and height of the Grid in pixels.
+        int gridHeight = (getCellSize() * rows);
+        int gridWidth = (getCellSize() * columns);
 
     	//Vertical lines.
     	for (int x = 0; x < columns; x ++) {
-    	    int drawX = (x * blockWidth) + blockWidth;
+    	    int drawX = (x * getCellSize()) + getCellSize();
     	    g.drawLine(drawX + offsetX, offsetY, drawX + offsetX, gridHeight + offsetY);
         }
 
     	//Horizontal lines.
         for (int y = 0; y < rows; y ++) {
-    	    int drawY = (y * blockHeight) + blockHeight;
+    	    int drawY = (y * getCellSize()) + getCellSize();
     	    g.drawLine(offsetX, drawY + offsetY, offsetX + gridWidth, drawY + offsetY);
         }
 
@@ -121,7 +124,7 @@ public class Grid {
     }
 
     /**
-     * Draw all of the game blocks that are on the grid.
+     * Draw all of the game blocks that are on the Grid.
      * @param g The graphics object used to draw.
      */
     private void drawBlocks(Graphics g) {
@@ -131,7 +134,7 @@ public class Grid {
     }
 
     /**
-     * Remove all blocks from the grid.
+     * Remove all blocks from the Grid.
      */
     public void removeAllBlocks() {
         blocks.clear();
@@ -227,11 +230,36 @@ public class Grid {
     }
 
     /**
-     * Gets all of the blocks in the grid.
+     * Checks to see if the mouse is inside of the Grid.
+     * @param e The mouse event.
+     * @return True for yes, false for no.
+     */
+    public boolean isMouseInsideGrid(MouseEvent e) {
+        //Check horizontally.
+        if (e.getX() >= getX() && e.getX() <= getX() + getGridDimensions().getWidth()) {
+            //Check vertically.
+            if (e.getY() >= getY() && e.getY() <= getY() + getGridDimensions().getHeight()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets all of the blocks in the Grid.
      * @return All the blocks in the form of an arrayList.
      */
     public ArrayList<Block> getBlocks() {
         return blocks;
+    }
+
+    /**
+     * Returns the height and the width of the Grid. Calculates it from multiplying the size of each cell by the number
+     * of columns and rows.
+     * @return The dimensions.
+     */
+    public Dimension getGridDimensions() {
+        return new Dimension(getCellSize() * getColumns(), getCellSize() * getRows());
     }
 
     /*  Getters and Setters */
@@ -245,7 +273,7 @@ public class Grid {
     }
 
     /**
-     * Set the x coordinate of the grid.
+     * Set the x coordinate of the Grid.
      * @param x The new x coordinate.
      */
     public void setX(int x) {
@@ -253,7 +281,7 @@ public class Grid {
     }
 
     /**
-     * Set the y coordinate of the grid.
+     * Set the y coordinate of the Grid.
      * @param y The new y coordinate.
      */
     public void setY(int y) {
@@ -261,7 +289,7 @@ public class Grid {
     }
 
     /**
-     * Set the number of rows in the grid.
+     * Set the number of rows in the Grid.
      * @param rows The new number of rows.
      */
     public void setRows(int rows) {
@@ -269,7 +297,7 @@ public class Grid {
     }
 
     /**
-     * Set the number of columns in the grid.
+     * Set the number of columns in the Grid.
      * @param columns The new number of columns.
      */
     public void setColumns(int columns) {
@@ -277,7 +305,15 @@ public class Grid {
     }
 
     /**
-     * Get the number of rows in the grid.
+     * Set the size of the each cell in the Grid.
+     * @param cellSize The new cell size.
+     */
+    public void setCellSize(int cellSize) {
+        this.cellSize = cellSize;
+    }
+
+    /**
+     * Get the number of rows in the Grid.
      * @return The number of rows.
      */
     public int getRows() {
@@ -285,7 +321,7 @@ public class Grid {
     }
 
     /**
-     * Get the number of columns in the grid.
+     * Get the number of columns in the Grid.
      * @return The number of colunms.
      */
     public int getColumns() {
@@ -293,7 +329,7 @@ public class Grid {
     }
 
     /**
-     * Get the x coordinate of the grid in relation to the window.
+     * Get the x coordinate of the Grid in relation to the window.
      * @return The x position, in pixels.
      */
     public int getX() {
@@ -301,10 +337,19 @@ public class Grid {
     }
 
     /**
-     * Get the y coordinate of the grid in relation to the window.
+     * Get the y coordinate of the Grid in relation to the window.
      * @return The y position, in pixels.
      */
     public int getY() {
         return y;
     }
+
+    /**
+     * Get the size of the cells.
+     * @return The size of the cells, in pixels.
+     */
+    public int getCellSize() {
+        return cellSize;
+    }
+
 }

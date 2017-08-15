@@ -12,8 +12,18 @@ public class test {
         Point point1 = new Point(1,1);
         method(point1);
         System.out.println(point1.toString());
+        TextComponent overlayButton = getValue();
+        if (overlayButton == new Button(1,1,1,1,"t",Color.black,Color.BLACK)) {
+
+        }
+        else {
+            System.out.println(overlayButton);
+        }
     }
 
+    private static TextComponent getValue() {
+        return null;
+    }
     public static void method(Point point2) {
         // Value of point1 is set.
         point2.setLocation(2,2);

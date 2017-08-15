@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -159,7 +160,7 @@ public class Tetromino {
             block = new Block(2,1,colour);
             gamePieceBlocks.add(block);
             //Specify the origin around which to rotate.
-            origin = new Point(0, 0);
+            origin = new Point(1, 0);
         }
         //S Piece.
         else if (gen == 4) {
@@ -267,7 +268,6 @@ public class Tetromino {
             ArrayList<Block> tempBlocks = copyBlocks(gamePieceBlocks);
             //Attempt to rotate these blocks.
             boolean success = attemptRotate(tempBlocks,true);
-            System.out.println("it was " + success);
 
             //Successful; actually rotate now.
             if (success == true) {
@@ -489,7 +489,7 @@ public class Tetromino {
     }
 
     /**
-     * Make sure the Tetromino stays within the grid. If it is not, shift it so that it is.
+     * Make sure the Tetromino stays within the Grid. If it is not, shift it so that it is.
      */
     public void keepWithinGrid(ArrayList<Block> blocks) {
 
@@ -516,7 +516,65 @@ public class Tetromino {
     }
 
     /**
-     * Moves the Tetromino down one row/cell on the grid, if possible.
+     * Move the Tetromino to the mouse horizontally. Only do so if the mouse is within the Grid.
+     * @param e The mouse event.
+     */
+    public void moveToMouse(MouseEvent e) {
+
+        //Only move if the mouse is inside of the Grid.
+        if (getGrid().isMouseInsideGrid(e) == true) {
+            //Convert mouse location to a coordinate on the Grid.
+            int newX = getMousePosition(e);
+            //Move Tetromino horizontally to the specified position.
+            shiftToPosition(newX);
+        }
+    }
+
+    /**
+     * Calculates what column on the Grid the mouse currently occupies. Takes the Grid`s position in the window into
+     * account. If the mouse is out of bounds, -1 will be returned.
+     * @param e The mouse event.
+     * @return The column that the mouse is in. If mouse is out of bounds, -1 is returned.
+     */
+    private int getMousePosition(MouseEvent e) {
+
+        //The mouse`s 'real' location on the Grid, after adjusting for the Grid`s position in the Window.
+        int realX = e.getX() - getGrid().getX();
+
+        //Get the column of the Grid that the mouse occupies.
+        int column = (int) Math.floor(realX / getGrid().getCellSize());
+
+        //Out of bounds.
+        if (column < 0 || column > getGrid().getColumns() - 1) {
+            return -1;
+        }
+        else {
+            return column;
+        }
+    }
+
+    /**
+     * Moves the origin horizontally to the specified position. Translate the blocks accordingly to stay with the
+     * origin.
+     * @param newX The new x position to move origin to.
+     */
+    private void shiftToPosition(int newX) {
+        //Calculate how to move.
+        int move = (int) (newX - origin.getX());
+        for (int i = 0; i < (Math.abs(move)); i ++) {
+            //Move left.
+            if (move < 0) {
+                moveLeft();
+            }
+            //Move right.
+            else if (move > 0) {
+                moveRight();
+            }
+        }
+    }
+
+    /**
+     * Moves the Tetromino down one row/cell on the Grid, if possible.
      * @return True if successful, false if it is not.
      */
     public boolean moveDown() {
@@ -556,7 +614,7 @@ public class Tetromino {
     }
 
     /**
-     * Moves the Tetromino down one row/cell on the grid.
+     * Moves the Tetromino down one row/cell on the Grid. Also adjusts the origin to compensate.
      */
     public void shiftDown(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -569,7 +627,7 @@ public class Tetromino {
     }
 
     /**
-     * Moves the Tetromino up one row/cell on the grid.
+     * Moves the Tetromino up one row/cell on the Grid. Also adjusts the origin to compensate.
      */
     public void shiftUp(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -582,7 +640,7 @@ public class Tetromino {
     }
 
     /**
-     * Moves the Tetromino one column/cell left on the grid.
+     * Moves the Tetromino one column/cell left on the Grid. Also adjusts the origin to compensate.
      */
     public void shiftLeft(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -595,7 +653,7 @@ public class Tetromino {
     }
 
     /**
-     * Moves the Tetromino one column/cell right on the grid.
+     * Moves the Tetromino one column/cell right on the Grid. Also adjusts the origin to compensate.
      */
     public void shiftRight(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -674,13 +732,13 @@ public class Tetromino {
     }
 
     /**
-     * Add this Tetromino to the game grid. Sets the position of the piece to the center of the grid, 4 cells above
+     * Add this Tetromino to the game Grid. Sets the position of the piece to the center of the Grid, 4 cells above
      * the top boundary.
-     * @param newGrid The game grid to add this Tetromino to.
+     * @param newGrid The game Grid to add this Tetromino to.
      */
     public void changeGrid(Grid newGrid) {
 
-        //Change grid object.
+        //Change Grid object.
         grid = newGrid;
         //Get the new blocks.
         gridBlocks = grid.getBlocks();

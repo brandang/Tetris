@@ -19,7 +19,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
             "Tetromino. The up key is to rotate the Tetromino 90 degrees counter-clockwise, while the down key is to " +
             " drop the Tetromino to the ground. Alternatively, the mouse may be used to play the game. To do so, move " +
             "the Tetromino by moving the mouse. Rotate it by pressing the left mouse button, and drop the Tetromino by" +
-            "holding down the right mouse button.";
+            " holding down the right mouse button.";
 
     //Text that displays the Instructions.
     final private static String INSTRUCTIONS_TEXT = "Tetris! This game is my version of the popular puzzle game. The" +

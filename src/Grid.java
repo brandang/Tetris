@@ -52,9 +52,8 @@ public class Grid {
         setCellSize(Block.getBlockWidth());
     }
 
-    /*
     //TEST
-    public void test() {
+   /* public void test() {
         for (int i = 0; i < rows; i ++) {
             Block block = new Block(0,i,Color.WHITE);
             block.setPartOfGamePiece(false);
@@ -63,8 +62,7 @@ public class Grid {
             block.setPartOfGamePiece(false);
             getBlocks().add(block);
         }
-    }
-    */
+    }*/
 
     /**
      * Draw the Grid.

@@ -65,6 +65,9 @@ public class Tetromino {
         //Secondly, generate a random shape, based on number.
         int gen = random.nextInt(7);
 
+        //TEST
+//        gen = 3;
+
         /*
         There are 7 types of blocks that can be generated, shown below. Let 0 represent empty space and 1
         represent a block.
@@ -271,11 +274,11 @@ public class Tetromino {
             //Get copy.
             ArrayList<Block> tempBlocks = copyBlocks(gamePieceBlocks);
             //Attempt to rotate these blocks.
-            boolean success = attemptRotate(tempBlocks,true);
+            boolean success = attemptRotate(tempBlocks,false);
 
             //Successful; actually rotate now.
             if (success == true) {
-                attemptRotate(gamePieceBlocks,false);
+                attemptRotate(gamePieceBlocks,true);
             }
         }
     }
@@ -365,7 +368,7 @@ public class Tetromino {
         make a copy of the origin and revert it after calling keepWithinGrid. This is because keepWithinGrid may
         change the origin.
          */
-        if (updateOrigin == true) {
+        if (updateOrigin == false) {
             Point originClone = (Point) origin.clone();
             keepWithinGrid(blocks);
             origin = originClone;
@@ -376,9 +379,9 @@ public class Tetromino {
 
         //Tetromino has collided with a stationary block. See if it is possible to shift left or right to avoid
         // collision.
-        if (hasCollided(blocks)) {
+        /*if (hasCollided(blocks)) {
             for (int i = 0; i < MAX_SHIFT_DISTANCE; i ++) {
-                //If the origin is not
+                //If the origin is not to be changed.
                 if (updateOrigin == false) {
                     //Prevent origin from changing, since it is specified not to change.
                     Point temp = (Point) origin.clone();
@@ -386,24 +389,69 @@ public class Tetromino {
                     shiftRight(blocks);
                     origin = temp;
                 }
+                else {
+                    shiftRight(blocks);
+                }
                 if (hasCollided(blocks) == false) {
                     return true;
                 }
             }
             if (hasCollided(blocks)) {
                 for (int i = 0; i < 4; i ++) {
+                    //If the origin is not to be changed.
                     if (updateOrigin == false) {
                         //Prevent origin from changing, since it is specified not to change.
                         Point temp = (Point) origin.clone();
-                        shiftRight(blocks);
+                        shiftLeft(blocks);
                         origin = temp;
+                    }
+                    else {
+                        shiftLeft(blocks);
                     }
                     if (hasCollided(blocks) == false) {
                         return true;
                     }
                 }
             }
+        }*/
+
+        //Tetromino has collided with a stationary block. See if it is possible to shift left or right to avoid
+        // collision.
+        if (hasCollided(blocks)) {
+            Point temp = (Point) origin.clone();
+
+
+            /*
+            The goal is to find the least amount of shifts needed to make the Tetromino not collide with anything.
+            In order to do this, first test with one shift for left and right sides. If that fails, test with two
+            shifts, and so on.
+             */
+            for (int shiftAmount = 1; shiftAmount <= MAX_SHIFT_DISTANCE; shiftAmount ++) {
+                //Shift right by shift amount.
+                for (int i = 0; i < shiftAmount; i ++) {
+                    shiftRight(blocks);
+                }
+                //No collision: it is able to shift here.
+                if (hasCollided(blocks) == false) {
+                    return true;
+                }
+                //Shift twice amount of distance to the left, to cancel out shift to the right.
+                for (int i = 0; i < shiftAmount*2; i ++) {
+                    shiftLeft(blocks);
+                }
+                //No collision: it is able to shift here.
+                if (hasCollided(blocks) == false) {
+                    return true;
+                }
+            }
+
+            //Revert origin if it is specified that origin is not to be modified. shiftLeft() and shiftRight() may
+            //have modified origin.
+            if (updateOrigin == false) {
+                origin = temp;
+            }
         }
+        //Still has collision, so rotation not possible.
         if (hasCollided(blocks)) {
             return false;
         }

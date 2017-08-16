@@ -1,5 +1,4 @@
 import java.awt.Color;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 
 /**
@@ -9,7 +8,8 @@ import java.awt.Graphics;
  */
 public class Button extends TextComponent {
 
-	//The primary colour is the default color. The secondary colour is when the user hovers the mouse over or clicks the button.
+	//The primary colour is the default color. The secondary colour is when the user hovers the mouse
+	// over or clicks the button.
 	private Color primaryColour;
 	private Color secondaryColour;
 
@@ -24,12 +24,15 @@ public class Button extends TextComponent {
 	 * @param secondaryColour The secondary colour of the button.
 	 */
 	public Button(int x, int y, int w, int h, String text, Color primaryColour, Color secondaryColour) {
-		super(x,y,w,h,text);
+		super(x ,y, w, h, text);
 		//Set defaults.
-		this.primaryColour = primaryColour;
-		this.secondaryColour = secondaryColour;
+		setPrimaryColour(primaryColour);
+		setSecondaryColour(secondaryColour);
 		setCornerSize(40);
 		setClickable(true);
+		setTextAlignment(TEXT_ALIGN_CENTER);
+		setSidePadding(15);
+		setTopPadding(15);
 	}
 	
 	/**
@@ -49,7 +52,7 @@ public class Button extends TextComponent {
 				drawPrimary(g);
 			}
 		}
-		//Else, just draw the primary state.
+		//Else, just draw the primary state, if clicking is disabled.
 		else if (isClickable() == false) {
 			drawPrimary(g);
 		}
@@ -60,7 +63,7 @@ public class Button extends TextComponent {
 	 * @param g The graphics object.
 	 */
 	private void drawPrimary(Graphics g) {
-		g.setColor(primaryColour);
+		g.setColor(getPrimaryColour());
 		g.fillRoundRect(getX(), getY(), getW(), getH(), getCornerSize(), getCornerSize());
 		drawButtonText(g);
 	}
@@ -70,7 +73,7 @@ public class Button extends TextComponent {
 	 * @param g The graphics object.
 	 */
 	private void drawSecondary(Graphics g) {
-		g.setColor(secondaryColour);
+		g.setColor(getSecondaryColour());
 		g.fillRoundRect(getX(), getY(), getW(), getH(), getCornerSize(), getCornerSize());
 		drawButtonText(g);
 	}
@@ -83,17 +86,46 @@ public class Button extends TextComponent {
 		//Set colour and font.
 		g.setColor(getTextColour());
 		g.setFont(getTextFont());
-		
-		//Calculate the width of the button text.
-		//Method obtained by online reference.
-		FontMetrics fontMetrics = g.getFontMetrics(getTextFont());
-		int textWidth = fontMetrics.stringWidth(getText());
-		
-		//Get the center of the button.
-		int centerX = getX()+(getW()/2);
-		int centerY = getY()+(getH()/2);
-		
+
+		//Calculate where to draw the text in order to center it on the button.
+		int drawX = getCenterTextHorizontal(getText(), g);
+		int drawY = getCenterTextVertical();
+
 		//Draw the text in the center of the button.
-		g.drawString(getText(), centerX-(textWidth/2), centerY);
+		g.drawString(getText(), drawX, drawY);
+	}
+
+	/* Getters and setters. */
+
+	/**
+	 * Get the primary colour.
+	 * @return The primary colour.
+	 */
+	public Color getPrimaryColour() {
+		return primaryColour;
+	}
+
+	/**
+	 * Set the primary colour.
+	 * @param primaryColour The primary colour.
+	 */
+	public void setPrimaryColour(Color primaryColour) {
+		this.primaryColour = primaryColour;
+	}
+
+	/**
+	 * Get the secondary colour.
+	 * @return The secondary colour.
+	 */
+	public Color getSecondaryColour() {
+		return secondaryColour;
+	}
+
+	/**
+	 * Set the secondary colour.
+	 * @param secondaryColour The secondary colour.
+	 */
+	public void setSecondaryColour(Color secondaryColour) {
+		this.secondaryColour = secondaryColour;
 	}
 }

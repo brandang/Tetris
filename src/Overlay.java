@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
  * It has the ability to add buttons and text boxes to it.
  */
 public class Overlay extends TextComponent{
+
     //Colours.
     final private static Color BACKGROUND_COLOUR = new Color(0, 101, 145);
     final private static Color OUTLINE_COLOUR = new Color(56, 194, 0);
@@ -15,31 +16,34 @@ public class Overlay extends TextComponent{
     //Managers for buttons and text boxes.
     private ButtonManager buttonManager;
     private TextComponentManager textComponentManager;
-    private Dimension screenSize;
+
+    //The size of the game window.
+    private Dimension windowSize;
 
     //The size of the outline.
     final private static int OUTLINE_SIZE = 15;
 
     /**
      * Constructor.
-     * @param x
-     * @param y
-     * @param w
-     * @param h
-     * @param title
-     * @param screenSize
+     * @param x The x coordinate of the Overlay menu.
+     * @param y The y coordinate of the Overlay menu.
+     * @param w The width of the Overlay menu.
+     * @param h The height of the Overlay menu.
+     * @param title The title of the menu.
+     * @param windowSize The size of the window.
      */
-    public Overlay(int x, int y, int w, int h,String title, Dimension screenSize) {
-        super(x,y,w,h,title);
+    public Overlay(int x, int y, int w, int h, String title, Dimension windowSize) {
+
+        super(x, y, w, h, title);
         buttonManager = new ButtonManager();
         textComponentManager = new TextComponentManager();
 
-        this.screenSize = screenSize;
+        setWindowSize(windowSize);
 
         //Add the title.
-        TextBox textBox = new TextBox(getX(),getY(),getW(),60,title);
+        TextBox textBox = new TextBox(getX(), getY(), getW(),60, title);
         textBox.setTextAlignment(TEXT_ALIGN_CENTER);
-        textBox.setTopMargins(30);
+        textBox.setTopPadding(30);
         textBox.setCornerSize(20);
         textComponentManager.addComponent(textBox);
 
@@ -48,7 +52,7 @@ public class Overlay extends TextComponent{
 
     /**
      * Add button.
-     * @param button
+     * @param button The button to add.
      */
     public void addButton(Button button) {
         buttonManager.addComponent(button);
@@ -56,7 +60,7 @@ public class Overlay extends TextComponent{
 
     /**
      * Add text box.
-     * @param textBox
+     * @param textBox The text box to add.
      */
     public void addTextBox(TextBox textBox) {
         textComponentManager.addComponent(textBox);
@@ -64,38 +68,39 @@ public class Overlay extends TextComponent{
 
     /**
      * Updates the buttons to their states.
-     * @param e
+     * @param e The mouse event.
      */
     public void updateButtonStates(MouseEvent e) {
         buttonManager.updateButtonStates(e);
     }
 
     /**
-     * Draw the overlay.
+     * Draw the overlay. Note that this draw method needs to be called AFTER everything else has been drawn.
      * @param g The graphics object.
      */
     public void draw(Graphics g) {
-        drawBackground(g,screenSize);
+        drawBackground(g, getWindowSize());
         drawTextComponents(g);
     }
 
     /**
      * Draw the background of the overlay.
-     * @param g
-     * @param screenSize
+     * @param g The graphics object.
+     * @param windowSize The size of the window.
      */
-    private void drawBackground(Graphics g, Dimension screenSize) {
+    private void drawBackground(Graphics g, Dimension windowSize) {
         g.setColor(OVERLAY_TRANSPARENT_COLOUR);
-        g.fillRect(0,0,screenSize.width,screenSize.height);
+        g.fillRect(0,0, windowSize.width, windowSize.height);
         g.setColor(OUTLINE_COLOUR);
-        g.fillRoundRect(getX(),getY(),getW(),getH(),getCornerSize(),getCornerSize());
+        g.fillRoundRect(getX(), getY(), getW(),getH(), getCornerSize(), getCornerSize());
         g.setColor(BACKGROUND_COLOUR);
-        g.fillRoundRect(getX()+OUTLINE_SIZE,getY()+OUTLINE_SIZE,getW()-(OUTLINE_SIZE*2),getH()-(OUTLINE_SIZE*2),getCornerSize(),getCornerSize());
+        g.fillRoundRect(getX() + OUTLINE_SIZE,getY() + OUTLINE_SIZE,getW() - (OUTLINE_SIZE*2),getH()
+                - (OUTLINE_SIZE * 2), getCornerSize(), getCornerSize());
     }
 
     /**
      * Draw the buttons and text boxes of the overlay.
-     * @param g
+     * @param g The graphics object.
      */
     private void drawTextComponents(Graphics g) {
         buttonManager.drawComponents(g);
@@ -104,10 +109,26 @@ public class Overlay extends TextComponent{
 
     /**
      * Checks to see which button, if any, was clicked.
-     * @param e
-     * @return
+     * @param e The mouse event.
+     * @return The button that was clicked.
      */
     public Button getClickedButton(MouseEvent e) {
         return (Button) buttonManager.getClickedButton(e);
+    }
+
+    /**
+     * Update the size of the window.
+     * @param windowSize The size of the window, as a Dimension object..
+     */
+    public void setWindowSize(Dimension windowSize) {
+        this.windowSize = windowSize;
+    }
+
+    /**
+     * Get the last known size of the window.
+     * @return The last known size of the window, as a Dimension object.
+     */
+    public Dimension getWindowSize() {
+        return windowSize;
     }
 }

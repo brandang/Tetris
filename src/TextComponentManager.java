@@ -4,7 +4,6 @@ import java.util.ArrayList;
 /**
  * Class that manages TextComponent objects. It has the ability to store a list of TextComponent
  * objects, and draw all of them.
- * Because I even though did not explicitly create a constructor, it still exits, but it does not do anything.
  */
 public class TextComponentManager {
 
@@ -37,6 +36,11 @@ public class TextComponentManager {
     }
 
     /*  Getter  */
+
+    /**
+     * Gets all of the components.
+     * @return The components, as an arrayList.
+     */
     public ArrayList<TextComponent> getComponents() {
         return components;
     }

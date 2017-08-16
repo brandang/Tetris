@@ -1,53 +1,55 @@
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * This class represents a game piece. A game piece is an object that the user can control.
- * It is made up of many blocks. Once the game piece has 'landed', however, the blocks are
- * declared to be no longer a part of the game piece, and the game piece is destroyed as an entity
+ * This class represents a Tetromino. A Tetromino is a game piece that the user can control.
+ * It is made up of many blocks, which form shapes. Once the Tetromino has 'landed', however, the blocks are
+ * declared to be no longer a part of the Tetromino, and the Tetromino is destroyed as an entity
  * (although its blocks will remain).
  *
- * Each game piece will be contained within a 4 by 4 grid.
- * The pivot around which the game piece rotates is the center of the 4 by 4 grid.
+ * Each Tetromino will be contained within a 4 by 4 grid.
+ * The pivot around which the Tetromino rotates is the center of the 4 by 4 grid.
  *
- * OMG, there were so many bugs that I had to kill for this class!
  */
-public class GamePiece {
+public class Tetromino {
 
-    //The colour of the game piece. All of the blocks in the game piece will inherit this.
+    //The colour of the Tetromino. All of the blocks in the Tetromino will inherit this.
     private Color colour;
 
+    //The Grid object that the Tetromino is on.
     private Grid grid;
 
     //Reference to all of the blocks on the grid, obtained from Grid object.
-    //This allows us to modify the arrayList from the grid instance.
+    //This allows this Tetromino to modify the blocks in the Grid.
     private ArrayList<Block> gridBlocks = new ArrayList<>(0);
 
-    //All of the blocks that are a part of the game piece. Will contain some of the blocks in 'gridBlocks'.
+    //All of the blocks that are a part of the Tetromino. Will include some of the blocks found in 'gridBlocks'.
     private ArrayList<Block> gamePieceBlocks = new ArrayList<>(0);
 
     //The maximum number of blocks that can be placed end to end horizontally or vertically.
     final private static int SIZE = 4;
 
+    //The origin around which to rotate.
+    private Point origin;
+
+    //Whether or not the Tetromino has been generated yet.
+    private boolean generated = false;
+
     /**
-     * Constructor. Creates a new game piece.
-     * @param grid All of the blocks from the grid.
+     * Constructor. Creates a new Tetromino.
+     * @param grid The Grid that will hold this Tetromino.
      */
-    public GamePiece(Grid grid) {
-        /*
-        Reference to the arrayList in a Grid instance. This works because Java is pass by reference (technically,
-        it`s more complicated than that, but...)
-        This means that every change to the arrayList here will change the same object in the Grid class.
-        They are the same objects.
-        */
+    public Tetromino(Grid grid) {
+
         this.grid = grid;
+        //Get the arrayList of Blocks from the Grid object. This allows us to modify the blocks in the Grid from here.
         this.gridBlocks = grid.getBlocks();
     }
 
     /**
-     * Creates a random new game piece with a random shape, a random colour, a random orientation...
-     * So basically, a lot of randoms :)
+     * Creates a random new Tetromino with a random shape, a random colour, and a random orientation.
      */
     public void generateNewPiece() {
 
@@ -106,6 +108,8 @@ public class GamePiece {
         0000
          */
 
+        //Create shapes based on the generated number.
+
         //I Piece.
         if (gen == 0) {
             Block block = new Block(1,0,colour);
@@ -116,6 +120,8 @@ public class GamePiece {
             gamePieceBlocks.add(block);
             block = new Block(1,3,colour);
             gamePieceBlocks.add(block);
+            //Specify the origin around which to rotate.
+            origin = new Point(1, 1);
         }
         //J Piece.
         else if (gen == 1) {
@@ -127,6 +133,8 @@ public class GamePiece {
             gamePieceBlocks.add(block);
             block = new Block(1,2,colour);
             gamePieceBlocks.add(block);
+            //Specify the origin around which to rotate.
+            origin = new Point(2, 1);
         }
         //L Piece.
         else if (gen == 2) {
@@ -138,6 +146,8 @@ public class GamePiece {
             gamePieceBlocks.add(block);
             block = new Block(2,2,colour);
             gamePieceBlocks.add(block);
+            //Specify the origin around which to rotate.
+            origin = new Point(1, 1);
         }
         //O Piece.
         else if (gen == 3) {
@@ -149,6 +159,8 @@ public class GamePiece {
             gamePieceBlocks.add(block);
             block = new Block(2,1,colour);
             gamePieceBlocks.add(block);
+            //Specify the origin around which to rotate.
+            origin = new Point(1, 0);
         }
         //S Piece.
         else if (gen == 4) {
@@ -160,6 +172,8 @@ public class GamePiece {
             gamePieceBlocks.add(block);
             block = new Block(1,1,colour);
             gamePieceBlocks.add(block);
+            //Specify the origin around which to rotate.
+            origin = new Point(2, 0);
         }
         //Z Piece.
         else if (gen == 5) {
@@ -171,6 +185,8 @@ public class GamePiece {
             gamePieceBlocks.add(block);
             block = new Block(3,1,colour);
             gamePieceBlocks.add(block);
+            //Specify the origin around which to rotate.
+            origin = new Point(2, 1);
         }
         //T Piece.
         else if (gen == 6) {
@@ -182,18 +198,20 @@ public class GamePiece {
             gamePieceBlocks.add(block);
             block = new Block(2,1,colour);
             gamePieceBlocks.add(block);
+            //Specify the origin around which to rotate.
+            origin = new Point(2, 0);
         }
 
-        /*
-        Rotate randomly.
-         */
+        //Rotate randomly.
         gen = random.nextInt(4);
         for (int i = 0; i < gen; i ++) {
             rotate();
         }
 
-        //Add this game piece to the Grid to be drawn.
+        //Add this Tetromino to the Grid to be drawn.
         addBlocksToGrid();
+
+        generated = true;
     }
 
     /**
@@ -223,64 +241,125 @@ public class GamePiece {
         else if (gen == 5) {
             return Color.ORANGE;
         }
-        //I like this colour.
         else if (gen == 6) {
             return Color.GRAY;
         }
-        //I don`t like this colour.
         else {
             return Color.PINK;
         }
     }
 
     /**
-     * Rotates the game piece 90 degrees clockwise.
-     *
+     * Rotates the Tetromino 90 degrees counter-clockwise, if the Tetromino has been generated.
      */
     public void rotate() {
 
-        /*
-        This method is very complex and difficult!
-        There are soooo many potential problems.
-        Firstly, when rotated, the game piece may collide with other blocks. We need to prevent rotation if it
-        is not possible. Therefore, create a copy of all of the blocks in the piece, and apply the rotation to them.
-        Check to see if the rotation results in any overlaps/collisions with other blocks. If no, it is safe
-        to rotate.
-        */
+        //Can only rotate if the Tetromino has been created.
+        if (generated) {
 
-        //Get copy.
-        ArrayList<Block> tempBlocks = copyBlocks(gamePieceBlocks);
-        //Attempt to rotate these blocks.
-        boolean success = attemptRotate(tempBlocks);
+            /*
+            There are many potential problems that would prevent a Tetromino from being rotated. First of all,
+            the Tetromino may collide with other blocks. If it is not possible to rotate, prevent it from doing so. Do this
+            by creating a copy of all the blocks in the Tetromino, and then applying a rotation to them. Finally, check to
+            if the rotation results in any overlaps/collisions with other blocks. If no, it is safe to rotate.
+             */
 
-        //Successful; actually rotate now.
-        if (success == true) {
-            attemptRotate(gamePieceBlocks);
+            //Get copy.
+            ArrayList<Block> tempBlocks = copyBlocks(gamePieceBlocks);
+            //Attempt to rotate these blocks.
+            boolean success = attemptRotate(tempBlocks,true);
+
+            //Successful; actually rotate now.
+            if (success == true) {
+                attemptRotate(gamePieceBlocks,false);
+            }
         }
-
     }
 
     /**
      * Rotates the blocks.
      * @param blocks The blocks to rotate.
+     * @param updateOrigin Whether or not to update the origin after rotation. Origin may need to be updated when
+     * Tetromino is out of bounds and is shifted to compensate after rotation.
      * @return True if rotation successful, false if rotation resulted in overlaps.
      */
-    private boolean attemptRotate(ArrayList<Block> blocks) {
-        //Loop through each block.
-        int offsetX = 1000;
-        int offsetY = 1000;
+    private boolean attemptRotate(ArrayList<Block> blocks, boolean updateOrigin) {
 
         /*
-        Problem: we cant rotate the entire 'grid', as it will lead to unexpected results. Instead, we need to do a
-        'localized' rotation - that is, rotate just around the game piece. Its kinda hard to explain.
-         Offset represents the locations of the left most block and the top most blocks in the game piece.
-         We rotate starting from there. If we instead start rotating from (0,0), the game piece will most likely shift
-         as well as rotate, which is not what we want. This is kinda like setting the 'pivot' (sorta) of where to
-         rotate.
+        System.out.println(originX);
+        int offsetX = -((int) originX);
+        int offsetY = -((int) originY);
+
+        for (Block block : blocks) {
+
+            int oldX = block.getX() + offsetX;
+            int oldY = block.getY() + offsetY;
+            System.out.println("old x " + oldX);
+            //New x position is equal to the old y position.
+            int newX = oldY - 0 - (int)offsetX;
+            //The new y depends on the oldX.
+            int newY = oldX - (int)offsetY;
+
+            System.out.println("new y " + newY);
+            //Update the blocks` position.rotatedCoordinates[i].x += origin.x;
+        rotatedCoordinates[i].y += origin.y;
+            block.setX(newX);
+            block.setY(newY);
+        }*/
+
+
+        /*
+        Problem: it is not possible to simply rotate the Tetromino based solely on it's block`s positions on the grid,
+        as doing so would also shift the Tetromino. Therefore, in order to solve this, rotation must be done around
+        an origin, which must be centered in the Tetromino. The origin must be at (0, 0) in order to rotate properly.
+        Therefore, each of the blocks must be translated in relation with the origin. The Tetromino must be translated
+        so that the origin is moved to (0, 0).
          */
+
+        //Loop through all the blocks in the Tetromino.
+        for (Block block : blocks) {
+
+            //The origin needs to be at (0, 0). Translate the block`s coordinates so that it is in relation to the
+            //origin.
+            Point translatedCoordinate = new Point(block.getX() - (int) origin.getX(), block.getY() - (int) origin.getY());
+
+            //Multiply be -1 because y values increase as you go down vertically, instead of increasing as you go up.
+            translatedCoordinate.y *= -1;
+
+            //Copy the coordinates so that calculations can be done with them.
+            Point rotatedCoordinates = (Point) translatedCoordinate.clone();
+
+            /*
+            To rotate counter clockwise, the formula is:
+            New x coordinate = (Xcosθ) - (Ysinθ), where x and y are the distances from the origin, and θ is the angle
+            in which to rotate.
+            New y coordinate = (Xsinθ) - (Ycosθ), where x and y are the distances from the origin, and θ is the angle
+            in which to rotate.
+            θ is the angle in which to rotate, in radians. Since we are rotating 90 degrees counter clockwise, θ is
+            equal to (Math.PI/2).
+             */
+            rotatedCoordinates.x = (int)Math.round(translatedCoordinate.x * Math.cos(Math.PI/2) - translatedCoordinate.y
+                    * Math.sin(Math.PI/2));
+            rotatedCoordinates.y = (int)Math.round(translatedCoordinate.x * Math.sin(Math.PI/2) + translatedCoordinate.y
+                    * Math.cos(Math.PI/2));
+
+            //Flip the y values again.
+            rotatedCoordinates.y *= -1;
+
+            //Move back to original position before translation.
+            rotatedCoordinates.x += origin.getX();
+            rotatedCoordinates.y += origin.getY();
+
+            //Set new coordinates.
+            block.setX(rotatedCoordinates.x);
+            block.setY(rotatedCoordinates.y);
+        }
+
+
+        /*
         //Get left most and top most position.
         for (Block block : blocks) {
-            if (block.getX()<offsetX) {
+            if (block.getX() < offsetX) {
                 offsetX = block.getX();
             }
             if (block.getY() < offsetY) {
@@ -292,7 +371,7 @@ public class GamePiece {
         for (Block block : blocks) {
             int oldX = block.getX()-offsetX;
             int oldY = block.getY()-offsetY;
-            /*
+            *//*
             To rotate:
             New x position is equal to the old y position.
             The new y depends on the oldX.
@@ -309,7 +388,7 @@ public class GamePiece {
             newX = oldY
             newY = SIZE - oldX - 1
             Note that we also have to account for the offset, which the scenario above ignores.
-             */
+             *//*
             //New x position is equal to the old y position.
             int newX = oldY + offsetX;
             //The new y depends on the oldX.
@@ -317,19 +396,61 @@ public class GamePiece {
             //Update the blocks` position.
             block.setX(newX);
             block.setY(newY);
-        }
+        }*/
 
         /*
-        Now, make sure that it stays within the boundaries.
+        Now, make sure that it stays within the boundaries. If it is specified that the origin is not to be updated,
+        make a copy of the origin and revert it after calling keepWithinGrid. This is because keepWithinGrid may
+        change the origin.
          */
-        keepWithinGrid(blocks);
-        //Make sure its not touching any stationary blocks.
+        if (updateOrigin == true) {
+            Point originClone = (Point) origin.clone();
+            keepWithinGrid(blocks);
+            origin = originClone;
+        }
+        else {
+            keepWithinGrid(blocks);
+        }
+
+        //TEST
+        /*//Make sure its not touching any stationary blocks.
         if (hasCollided(blocks) == true) {
             return false;
         }
         else {
             return true;
+        }*/
+
+        if (hasCollided(blocks)) {
+            for (int i = 0; i < 2; i ++) {
+                System.out.println("right");
+                if (updateOrigin == false) {
+                    Point temp = (Point) origin.clone();
+                    shiftRight(blocks);
+                    origin = temp;
+                }
+                if (hasCollided(blocks) == false) {
+                    return true;
+                }
+            }
+            if (hasCollided(blocks)) {
+                for (int i = 0; i < 4; i ++) {
+                    System.out.println("left");
+                    if (updateOrigin == false) {
+                        Point temp = (Point) origin.clone();
+                        shiftRight(blocks);
+                        origin = temp;
+                    }
+                    if (hasCollided(blocks) == false) {
+                        return true;
+                    }
+                }
+            }
         }
+        if (hasCollided(blocks)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -339,11 +460,10 @@ public class GamePiece {
      */
     private boolean hasCollided(ArrayList<Block> blocks) {
         for (Block gamePieceBlock : blocks) {
-            //Check with finsihed bocks
+            //Check with stationary blocks.
             for (Block stationaryBlock : gridBlocks) {
                 if (stationaryBlock.isPartOfGamePiece() == false) {
 
-                    //test
 //                    System.out.println(gamePieceBlock.getX()+" "+stationaryBlock.getX()+" "+gamePieceBlock.getY()+" "+stationaryBlock.getY());
                     if (gamePieceBlock.getY() == stationaryBlock.getY() && gamePieceBlock.getX() == stationaryBlock.getX()) {
                         return true;
@@ -362,22 +482,23 @@ public class GamePiece {
     }*/
 
     /**
-     * Keeps the game piece within bounds.
+     * Keeps the Tetromino within bounds.
      */
     public void stayWithinBounds() {
         keepWithinGrid(gamePieceBlocks);
     }
 
     /**
-     * Make sure the block group stays within the grid. If it is not, shift it so that it is.
+     * Make sure the Tetromino stays within the Grid. If it is not, shift it so that it is.
      */
     public void keepWithinGrid(ArrayList<Block> blocks) {
+
         //Get the 'indices' of boundaries. Blocks are not allowed to go past these.
         int boundLeft = 0;
         int boundRight = grid.getColumns()-1;
         int boundBottom = grid.getRows()-1;
 
-        //Loop through
+        //Loop through.
         for (Block block : blocks) {
             while (block.getX() < boundLeft) {
                 shiftRight(blocks);
@@ -389,13 +510,73 @@ public class GamePiece {
                 shiftUp(blocks);
             }
 
-            //Note that we don`t have to check for collision with the top since there is no way that the user can move
-            // the piece up.
+            //Note that we don`t have to check for collision with the top since it is considered that the top is not
+            // boundary.
         }
     }
 
     /**
-     * Moves the game piece down one row/cell on the grid, if possible.
+     * Move the Tetromino to the mouse horizontally. Only do so if the mouse is within the Grid.
+     * @param e The mouse event.
+     */
+    public void moveToMouse(MouseEvent e) {
+
+        //Only move if the mouse is inside of the Grid.
+        if (getGrid().isMouseInsideGrid(e) == true) {
+            //Convert mouse location to a coordinate on the Grid.
+            int newX = getMousePosition(e);
+            //Move Tetromino horizontally to the specified position, if it is not out of bounds.
+            if (newX != -1) {
+                shiftToPosition(newX);
+            }
+        }
+    }
+
+    /**
+     * Calculates what column on the Grid the mouse currently occupies. Takes the Grid`s position in the window into
+     * account. If the mouse is out of bounds, -1 will be returned.
+     * @param e The mouse event.
+     * @return The column that the mouse is in. If mouse is out of bounds, -1 is returned.
+     */
+    private int getMousePosition(MouseEvent e) {
+
+        //The mouse`s 'real' location on the Grid, after adjusting for the Grid`s position in the Window.
+        int realX = e.getX() - getGrid().getX();
+
+        //Get the column of the Grid that the mouse occupies.
+        int column = (int) Math.floor(realX / getGrid().getCellSize());
+
+        //Out of bounds.
+        if (column < 0 || column > getGrid().getColumns() - 1) {
+            return -1;
+        }
+        else {
+            return column;
+        }
+    }
+
+    /**
+     * Moves the origin horizontally to the specified position. Translate the blocks accordingly to stay with the
+     * origin.
+     * @param newX The new x position to move origin to.
+     */
+    private void shiftToPosition(int newX) {
+        //Calculate how to move.
+        int move = (int) (newX - origin.getX());
+        for (int i = 0; i < (Math.abs(move)); i ++) {
+            //Move left.
+            if (move < 0) {
+                moveLeft();
+            }
+            //Move right.
+            else if (move > 0) {
+                moveRight();
+            }
+        }
+    }
+
+    /**
+     * Moves the Tetromino down one row/cell on the Grid, if possible.
      * @return True if successful, false if it is not.
      */
     public boolean moveDown() {
@@ -410,14 +591,14 @@ public class GamePiece {
     }
 
     /**
-     * Move the game piece one cell up.
+     * Move the Tetromino one cell up.
      */
     public void moveUp() {
         shiftUp(gamePieceBlocks);
     }
 
     /**
-     * Move the game piece one cell left, if possible.
+     * Move the Tetromino one cell left, if possible.
      */
     public void moveLeft() {
         if (canShiftLeft() == true) {
@@ -426,7 +607,7 @@ public class GamePiece {
     }
 
     /**
-     * Move the game piece one cell right, if possible.
+     * Move the Tetromino one cell right, if possible.
      */
     public void moveRight() {
         if (canShiftRight() == true) {
@@ -435,7 +616,7 @@ public class GamePiece {
     }
 
     /**
-     * Moves the game piece down one row/cell on the grid.
+     * Moves the Tetromino down one row/cell on the Grid. Also adjusts the origin to compensate.
      */
     public void shiftDown(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -443,10 +624,12 @@ public class GamePiece {
             int newY = oldY + 1;
             block.setY(newY);
         }
+        //Shift origin too.
+        origin.y ++;
     }
 
     /**
-     * Moves the game piece up one row/cell on the grid.
+     * Moves the Tetromino up one row/cell on the Grid. Also adjusts the origin to compensate.
      */
     public void shiftUp(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -454,10 +637,12 @@ public class GamePiece {
             int newY = oldY -1;
             block.setY(newY);
         }
+        //Shift origin too.
+        origin.y --;
     }
 
     /**
-     * Moves the game piece one column/cell left on the grid.
+     * Moves the Tetromino one column/cell left on the Grid. Also adjusts the origin to compensate.
      */
     public void shiftLeft(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -465,10 +650,12 @@ public class GamePiece {
             int newX = oldX -1;
             block.setX(newX);
         }
+        //Shift origin too.
+        origin.x --;
     }
 
     /**
-     * Moves the game piece one column/cell right on the grid.
+     * Moves the Tetromino one column/cell right on the Grid. Also adjusts the origin to compensate.
      */
     public void shiftRight(ArrayList<Block> blocks) {
         for (Block block : blocks) {
@@ -476,10 +663,12 @@ public class GamePiece {
             int newX = oldX +1;
             block.setX(newX);
         }
+        //Shift origin too.
+        origin.x ++;
     }
 
     /**
-     * Determines whether or not the game piece can shift down.
+     * Determines whether or not the Tetromino can shift down.
      * @return True for yes, false for no.
      */
     private boolean canShiftDown() {
@@ -488,7 +677,7 @@ public class GamePiece {
             if (gamePieceBlock.getY() >= grid.getRows() - 1) {
                 return false;
             }
-            //Check with finsihed bocks
+            //Check with stationary blocks.
             for (Block stationaryBlock : gridBlocks) {
                 if (stationaryBlock.isPartOfGamePiece() == false) {
                     if (gamePieceBlock.getY() + 1 >= stationaryBlock.getY() && gamePieceBlock.getX() == stationaryBlock.getX()) {
@@ -501,7 +690,7 @@ public class GamePiece {
     }
 
     /**
-     * Determines whether or not the game piece can shift left.
+     * Determines whether or not the Tetromino can shift left.
      * @return True for yes, false for no.
      */
     private boolean canShiftLeft() {
@@ -523,7 +712,7 @@ public class GamePiece {
     }
 
     /**
-     * Determines whether or not the game piece can shift right.
+     * Determines whether or not the Tetromino can shift right.
      * @return True for yes, false for no.
      */
     private boolean canShiftRight() {
@@ -545,28 +734,24 @@ public class GamePiece {
     }
 
     /**
-     * Add this game piece to the game grid. Sets the position of the piece to the center of the grid, 4 cells above
+     * Add this Tetromino to the game Grid. Sets the position of the piece to the center of the Grid, 4 cells above
      * the top boundary.
-     * @param newGrid The game grid to add this game piece to.
+     * @param newGrid The game Grid to add this Tetromino to.
      */
     public void changeGrid(Grid newGrid) {
 
-        //Change grid object.
+        //Change Grid object.
         grid = newGrid;
         //Get the new blocks.
         gridBlocks = grid.getBlocks();
 
-        //Add the blocks of this game piece to the grid.
+        //Add the blocks of this Tetromino to the grid.
         addBlocksToGrid();
 
     }
 
-    public void addS() {
-
-    }
-
     /**
-     * Add all of the blocks belonging to this game piece to its Grid.
+     * Add all of the blocks belonging to this Tetromino to its Grid.
      */
     private void addBlocksToGrid() {
 //        System.out.println("before " + gridBlocks.size());
@@ -577,9 +762,9 @@ public class GamePiece {
     }
 
     /**
-     * Release the game piece: that means each block will no longer be associated with a game piece.
+     * Release the Tetromino: that means each block will no longer be associated with a Tetromino.
      */
-    public void releaseGamePiece() {
+    public void releaseBlocks() {
         for (Block block : gamePieceBlocks) {
             block.setPartOfGamePiece(false);
         }
@@ -610,7 +795,7 @@ public class GamePiece {
     }
 
     /**
-     * Gets all of the blocks in this game piece.
+     * Gets all of the blocks in this Tetromino.
      * @return The blocks, stored inside an arrayList.
      */
     public ArrayList<Block> getBlocks() {

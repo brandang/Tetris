@@ -21,9 +21,6 @@ public class TextBox extends TextComponent {
     //Colours.
     private Color backgroundColour;
 
-    //The margins for the text.
-    private int sideMargins, topMargins;
-
     //The vertical spacing between each line of text.
     private int lineSpacing;
 
@@ -46,12 +43,10 @@ public class TextBox extends TextComponent {
         super(x,y,w,h,text);
 
         //Set default values for the variables.
-        //Because of the sheer number of variables, it is not feasible to include all of them in the
-        //constructor. The properties should be set by calling the setters.
-        sideMargins = 15;
-        topMargins = 20;
-        lineSpacing = 20;
-        backgroundColour = Color.GRAY;
+        setSidePadding(15);
+        setTopPadding(20);
+        setBackgroundColour(Color.GRAY);
+        setLineSpacing(20);
         setCornerSize(5);
         setClickable(false);
     }
@@ -87,6 +82,7 @@ public class TextBox extends TextComponent {
             //No need to recalculate next time.
             recalculateTextFormat = false;
         }
+
         g.setColor(getTextColour());
         g.setFont(getTextFont());
 
@@ -98,13 +94,11 @@ public class TextBox extends TextComponent {
 
             //Loop through each line.
             for (int i = 0; i < lines.length; i ++) {
-                //Calculate where to draw the text and than draw it.
-                int stringWidth = fontMetrics.stringWidth(lines[i]);
-                //Amount of space that needs to be added to center the text.
-                int adjustment = (getW()-(sideMargins*2)-stringWidth)/2;
-                int drawX = getX() + sideMargins + adjustment;
-                int drawY = getY() + topMargins + (lineSpacing*i);
-                g.drawString(lines[i] + " ",drawX,drawY);
+
+                //Calculate where to draw the text, and then draw it.
+                int drawX = getCenterTextHorizontal(lines[i], g);
+                int drawY = getY() + getTopPadding() + (getLineSpacing() * i);
+                g.drawString(lines[i] + " ", drawX, drawY);
             }
         }
         //Else, assume that text needs to be aligned to the left side of the text area.
@@ -113,9 +107,9 @@ public class TextBox extends TextComponent {
             for (int i = 0; i < lines.length; i ++) {
 
                 //Calculate where to draw the text and than draw it.
-                int drawX = getX() + sideMargins;
-                int drawY = getY() + topMargins + (lineSpacing*i);
-                g.drawString(lines[i] + " ",drawX,drawY);
+                int drawX = getX() + getSidePadding();
+                int drawY = getY() + getTopPadding() + (getLineSpacing()*i);
+                g.drawString(lines[i] + " ", drawX, drawY);
             }
         }
     }
@@ -123,8 +117,6 @@ public class TextBox extends TextComponent {
     /**
      * Separate the text into multiple lines such that each line
      * does not exceed the size of the text area horizontally.
-     *
-     * This was one hell of a nightmare to debug!!!
      *
      * @param text The text.
      * @param g The graphics object.
@@ -134,14 +126,14 @@ public class TextBox extends TextComponent {
 
         ArrayList<String> lines = new ArrayList<>(0);
 
-        //Get each word in the text.
+        //Get each word in the string.
         //Do so by splitting each word around a space, which is the delimiter.
         String[] words = text.split(" ");
 
         //The maximum allowed width of each line of text.
-        int maxWidth = getW()-(sideMargins*2);
+        int maxWidth = getW()-(getSidePadding()*2);
 
-        //Loop until the last word is added to a line.
+        //Loop through each individual word, and assign it to a line.
         int index = 0;
         String currentLine = "";
         while (index < words.length) {
@@ -149,10 +141,9 @@ public class TextBox extends TextComponent {
             //Get information on rendering text on screen.
             FontMetrics fontMetrics = g.getFontMetrics(getTextFont());
             //Get the next word and add it to a temporary string.
-            String tempLine = currentLine;
-            tempLine += words[index];
+            String tempLine = currentLine + words[index];
 
-            //Consider space after each word too, if such word exists.
+            //Consider space after each word too, if there is a next word that exists.
             if (index + 1 < words.length) {
                 tempLine += " ";
             }
@@ -164,7 +155,7 @@ public class TextBox extends TextComponent {
 //            System.out.println(textWidth + "");
 //            System.out.println(tempLine);
 
-            //The additional word makes the line exceed the max allowed width.
+            //Check if the additional word makes the line exceed the max allowed width.
             if (textWidth > maxWidth) {
 
                 //Special case: a single 'word' is too long to fit alone on one line.
@@ -173,7 +164,7 @@ public class TextBox extends TextComponent {
                     lines.add(tempLine);
                     index ++;
                 }
-                //Else, the new added word just makes the size go over the limit.
+                //Else, the new added word just barely makes the size go over the limit.
                 else {
                     //Therefore, this line is now 'maxed out': no more words can be added.
                     //Add this line to the list; it is now complete.
@@ -181,7 +172,6 @@ public class TextBox extends TextComponent {
                     //Move on to the next line; it will start off empty.
                     currentLine = "";
                 }
-
             }
             //Else, more words can potentially be added without going over the limit.
             else {
@@ -189,21 +179,31 @@ public class TextBox extends TextComponent {
                 currentLine = tempLine;
                 index++;
 
-                //There are no more words available to be added. This last line is complete.
                 if (index == words.length) {
+                    //There are no more words available to be added. This last line is complete.
                     lines.add(currentLine);
                 }
             }
         }
 
-        System.out.println(lines.size()+"");
+//        System.out.println(lines.size()+"");
 
         //Return result as an array of strings.
         return lines.toArray(new String[lines.size()]);
     }
 
 
-    /*  Setters: Only contains overriden methods from parent class and some methods that are unique to this class. */
+    /*  Getters and Setters */
+
+    /**
+     * Get the current line spacing. Line spacing is the amount of pixels vertically between two lines.
+     * @return The line spacing.
+     */
+    public int getLineSpacing() {
+        return lineSpacing;
+    }
+
+    /* Overriden Setters. */
 
     @Override
     public void setText(String text) {
@@ -233,18 +233,18 @@ public class TextBox extends TextComponent {
         recalculateTextFormat = true;
     }
 
+    /**
+     * Set the background colour of the text box.
+     * @param backgroundColour The new background colour.
+     */
     public void setBackgroundColour(Color backgroundColour) {
         this.backgroundColour = backgroundColour;
     }
 
-    public void setSideMargins(int sideMargins) {
-        this.sideMargins = sideMargins;
-    }
-
-    public void setTopMargins(int topMargins) {
-        this.topMargins = topMargins;
-    }
-
+    /**
+     * Set the line spacing. Line spacing is the amount of pixels vertically between two lines.
+     * @param lineSpacing The new line spacing.
+     */
     public void setLineSpacing(int lineSpacing) {
         this.lineSpacing = lineSpacing;
     }

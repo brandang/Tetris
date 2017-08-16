@@ -14,18 +14,20 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     final private boolean debug = false;
 
     //Text that displays in the 'Controls Screen.'
-    final private static String CONTROLS_TEXT = "The controls of this game are simple. To play the game use the" +
+    final private static String CONTROLS_TEXT = "The controls of this game are simple. To play the game using the" +
             " keyboard, only the arrow keys need to be used. The left and right arrow keys are used to move the Tetris " +
             "Tetromino. The up key is to rotate the Tetromino 90 degrees counter-clockwise, while the down key is to " +
-            " drop the Tetromino to the ground.";
+            " drop the Tetromino to the ground. Alternatively, the mouse may be used to play the game. To do so, move " +
+            "the Tetromino by moving the mouse. Rotate it by pressing the left mouse button, and drop the Tetromino by" +
+            "holding down the right mouse button.";
 
     //Text that displays the Instructions.
-    final private static String INSTRUCTIONS_TEXT = "Tetris!!! This game is my version of the popular puzzle game. The" +
+    final private static String INSTRUCTIONS_TEXT = "Tetris! This game is my version of the popular puzzle game. The" +
             " objective is to move and rotate Tetrominoes to manipulate where they land. Once a Tetromino lands, " +
             "a next Tetromino is randomly chosen. When a full horizontal line of blocks is formed on the Grid, " +
             "that row is deleted. All of the blocks above that line will fall down by one cell. One point is earned" +
             " from this. The game ends when any block lands on the terminal line at the top of the Grid." +
-            " Good luck, and have FUN!";
+            " Good luck, and have Fun!";
 
     //Link to webpage that describes the game.
     final private static String TETRIS_INFO_URL = "https://en.wikipedia.org/wiki/Tetris#Gameplay";
@@ -549,8 +551,11 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
         if (currentTetromino != null) {
             boolean canDropDown = currentTetromino.moveDown();
 
-            //Land the Tetromino.
+            //Land the Tetromino : it can no longer drop.
             if (canDropDown == false) {
+                //Release the right mouse button so that the next Tetromino does not automatically start dropping.
+                releaseRightMouseButton();
+
                 //Release all of the blocks that were formerly a part of the piece.
                 currentTetromino.releaseBlocks();
                 //Use the next Tetromino.
@@ -687,7 +692,6 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
             //Get the button that was clicked from the overlay menu, if any. Only do so if menu exists.
             if (menuOverlay != null) {
                 TextComponent overlayButton = menuOverlay.getClickedButton(e);
-                System.out.println(overlayButton);
                 //User pressed 'Resume'.
                 if (but2 == overlayButton) {
                     //Unpause the game.
@@ -814,6 +818,24 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
 
         //Store the mouse event.
         previousMouseEvent = e;
+
+        //User input with game through the mouse.
+        if (getState() == State.GAME_ON) {
+            //Mouse is inside the game Grid.
+            if (gameGrid.isMouseInsideGrid(e) == true) {
+                //Move Tetromino to mouse.
+                currentTetromino.moveToMouse(e);
+
+                //The right mouse button is being held down.
+                if (e.getModifiers() == InputEvent.BUTTON3_MASK) {
+//                    currentTetromino.moveToMouse(e);
+                }
+            }
+            //Mouse is outside of the game Grid: release the button to prevent further rotation.
+            else {
+                releaseRightMouseButton();
+            }
+        }
     }
 
     @Override
@@ -833,7 +855,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
             }
         }
     }
-    
+
     @Override
 	public void keyPressed(KeyEvent e) {
         if (getState() == State.GAME_ON) {
@@ -857,12 +879,11 @@ public class GamePanel extends JPanel implements ActionListener, MouseMotionList
     /*	Unused inherited methods.   */
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-
+    public void mouseExited(MouseEvent e) {
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseEntered(MouseEvent e) {
 
     }
 

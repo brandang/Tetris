@@ -525,8 +525,10 @@ public class Tetromino {
         if (getGrid().isMouseInsideGrid(e) == true) {
             //Convert mouse location to a coordinate on the Grid.
             int newX = getMousePosition(e);
-            //Move Tetromino horizontally to the specified position.
-            shiftToPosition(newX);
+            //Move Tetromino horizontally to the specified position, if it is not out of bounds.
+            if (newX != -1) {
+                shiftToPosition(newX);
+            }
         }
     }
 

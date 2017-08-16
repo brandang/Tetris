@@ -37,6 +37,10 @@ public class Tetromino {
     //Whether or not the Tetromino has been generated yet.
     private boolean generated = false;
 
+    //The maximum number of shifts that may be undertaken to attempt to accommodate Tetromino after rotation in order
+    // to avoid collisions with stationary blocks.
+    final private static int MAX_SHIFT_DISTANCE = 2;
+
     /**
      * Constructor. Creates a new Tetromino.
      * @param grid The Grid that will hold this Tetromino.
@@ -357,48 +361,6 @@ public class Tetromino {
 
 
         /*
-        //Get left most and top most position.
-        for (Block block : blocks) {
-            if (block.getX() < offsetX) {
-                offsetX = block.getX();
-            }
-            if (block.getY() < offsetY) {
-                offsetY = block.getY();
-            }
-        }
-
-        //Rotate just the 4 by 4 mini grid that contains the game piece.
-        for (Block block : blocks) {
-            int oldX = block.getX()-offsetX;
-            int oldY = block.getY()-offsetY;
-            *//*
-            To rotate:
-            New x position is equal to the old y position.
-            The new y depends on the oldX.
-            The diagram below shows why:
-            123
-            456
-            789
-            rotated becomes:
-            369
-            258
-            147
-
-            The formula is:
-            newX = oldY
-            newY = SIZE - oldX - 1
-            Note that we also have to account for the offset, which the scenario above ignores.
-             *//*
-            //New x position is equal to the old y position.
-            int newX = oldY + offsetX;
-            //The new y depends on the oldX.
-            int newY = SIZE - oldX - 1 + offsetY;
-            //Update the blocks` position.
-            block.setX(newX);
-            block.setY(newY);
-        }*/
-
-        /*
         Now, make sure that it stays within the boundaries. If it is specified that the origin is not to be updated,
         make a copy of the origin and revert it after calling keepWithinGrid. This is because keepWithinGrid may
         change the origin.
@@ -412,20 +374,15 @@ public class Tetromino {
             keepWithinGrid(blocks);
         }
 
-        //TEST
-        /*//Make sure its not touching any stationary blocks.
-        if (hasCollided(blocks) == true) {
-            return false;
-        }
-        else {
-            return true;
-        }*/
-
+        //Tetromino has collided with a stationary block. See if it is possible to shift left or right to avoid
+        // collision.
         if (hasCollided(blocks)) {
-            for (int i = 0; i < 2; i ++) {
-                System.out.println("right");
+            for (int i = 0; i < MAX_SHIFT_DISTANCE; i ++) {
+                //If the origin is not
                 if (updateOrigin == false) {
+                    //Prevent origin from changing, since it is specified not to change.
                     Point temp = (Point) origin.clone();
+                    //Shift right. Do not check if it is possible, just do it.
                     shiftRight(blocks);
                     origin = temp;
                 }
@@ -435,8 +392,8 @@ public class Tetromino {
             }
             if (hasCollided(blocks)) {
                 for (int i = 0; i < 4; i ++) {
-                    System.out.println("left");
                     if (updateOrigin == false) {
+                        //Prevent origin from changing, since it is specified not to change.
                         Point temp = (Point) origin.clone();
                         shiftRight(blocks);
                         origin = temp;
